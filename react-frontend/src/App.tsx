@@ -5,7 +5,6 @@ import { HomePage } from './pages/website/HomePage';
 import { AboutPage } from './pages/website/AboutPage';
 import { FeaturesPage } from './pages/website/FeaturesPage';
 import { ManualsPage } from './pages/website/ManualsPage';
-import { InquiriesPage } from './pages/website/InquiriesPage';
 import { ContactPage } from './pages/website/ContactPage';
 import { LoginPage } from './pages/website/LoginPage';
 import { AccountSettingsPage } from './pages/website/AccountSettingsPage';
@@ -21,7 +20,7 @@ interface StoredUser {
 
 export function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentPage, setCurrentPage] = useState('login');
+  const [currentPage, setCurrentPage] = useState('home');
   const [user, setUser] = useState<StoredUser | null>(null);
 
   // Check authentication on mount
@@ -68,8 +67,6 @@ export function App() {
         return <FeaturesPage />;
       case 'manuals':
         return <ManualsPage />;
-      case 'inquiries':
-        return <InquiriesPage />;
       case 'contact':
         return <ContactPage />;
       case 'tickets':
@@ -86,20 +83,27 @@ export function App() {
   };
 
   const handleNavigate = (page: string) => {
+    // Restrict navigation for unauthenticated users
+    const publicPages = ['home', 'about', 'contact', 'features', 'manuals', 'login'];
+    if (!isAuthenticated && !publicPages.includes(page)) {
+      setCurrentPage('login');
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      return;
+    }
+    
     setCurrentPage(page);
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
     });
   };
-  // Show only login page if not authenticated
-  if (!isAuthenticated && currentPage !== 'login') {
-    setCurrentPage('login');
-  }
 
   return <div className="min-h-screen bg-white font-sans text-gray-900">
-      {isAuthenticated && <Header currentPage={currentPage} onNavigate={handleNavigate} onLogout={handleLogout} user={user} />}
+      <Header currentPage={currentPage} onNavigate={handleNavigate} onLogout={isAuthenticated ? handleLogout : undefined} user={user} isAuthenticated={isAuthenticated} />
       <main>{renderPage()}</main>
-      {isAuthenticated && <Footer onNavigate={handleNavigate} />}
+      <Footer onNavigate={handleNavigate} />
     </div>;
 }

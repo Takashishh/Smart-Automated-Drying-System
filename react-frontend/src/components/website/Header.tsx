@@ -8,12 +8,14 @@ interface HeaderProps {
   user?: {
     displayName?: string;
   } | null;
+  isAuthenticated: boolean;
 }
 export function Header({
   currentPage,
   onNavigate,
   onLogout,
-  user
+  user,
+  isAuthenticated
 }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -24,12 +26,16 @@ export function Header({
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  const navItems = [{
+  
+  const allNavItems = [{
     id: 'home',
     label: 'Home'
   }, {
     id: 'about',
     label: 'About'
+  }, {
+    id: 'contact',
+    label: 'Contact'
   }, {
     id: 'features',
     label: 'Features'
@@ -37,18 +43,17 @@ export function Header({
     id: 'manuals',
     label: 'Manuals'
   }, {
-    id: 'inquiries',
-    label: 'Inquiries'
-  }, {
     id: 'tickets',
     label: 'Submit Ticket'
   }, {
     id: 'view-tickets',
     label: 'My Tickets'
-  }, {
-    id: 'contact',
-    label: 'Contact'
   }];
+
+  // Filter nav items based on authentication status
+  const navItems = isAuthenticated 
+    ? allNavItems 
+    : allNavItems.filter(item => ['home', 'about', 'contact', 'features', 'manuals'].includes(item.id));
 
   const handleNavClick = (id: string) => {
     if (id === 'logout') {
@@ -76,6 +81,9 @@ export function Header({
             {navItems.map(item => <button key={item.id} onClick={() => handleNavClick(item.id)} className={`text-sm font-medium transition-colors hover:text-blue-600 ${currentPage === item.id ? 'text-blue-600' : 'text-gray-600'}`}>
                 {item.label}
               </button>)}
+            {!isAuthenticated && <button onClick={() => onNavigate('login')} className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
+                Login
+              </button>}
             {user?.displayName && <button onClick={() => onNavigate('account')} className="text-sm font-semibold text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">{user.displayName}</button>}
             {onLogout && <button onClick={onLogout} className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
                 Logout
@@ -108,6 +116,12 @@ export function Header({
           }} className={`block w-full text-left text-lg font-medium ${currentPage === item.id ? 'text-blue-600' : 'text-gray-600'}`}>
                   {item.label}
                 </button>)}
+              {!isAuthenticated && <button onClick={() => {
+            onNavigate('login');
+            setIsMobileMenuOpen(false);
+          }} className="block w-full text-left text-lg font-medium text-blue-600">
+                  Login
+                </button>}
               {user?.displayName && <button onClick={() => {
             onNavigate('account');
             setIsMobileMenuOpen(false);

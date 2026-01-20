@@ -52,7 +52,7 @@ export function Footer({
           <div>
             <h3 className="font-semibold text-gray-900 mb-4">Support</h3>
             <ul className="space-y-3">
-              {['Inquiries', 'Contact', 'Privacy Policy', 'Terms of Service'].map(item => <li key={item}>
+              {['Contact', 'Privacy Policy', 'Terms of Service'].map(item => <li key={item}>
                   <button onClick={() => onNavigate(item.toLowerCase().split(' ')[0])} className="text-gray-500 hover:text-blue-600 text-sm transition-colors">
                     {item}
                   </button>
