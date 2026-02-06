@@ -42,6 +42,7 @@ export async function createAuditFunction(
 
     // 2️⃣ Normalize reason
     const normalizedReason = body.reason ?? "";
+    fastify.log.info(`normalized reason value: ${normalizedReason}`)
 
     // 3️⃣ Replace targetId with readable name if possible
     let targetReadable: string = body.target;
@@ -62,7 +63,7 @@ export async function createAuditFunction(
       performedBy: `${adminData.firstName} ${adminData.lastName} (${adminData.email})`,
       action: body.action,
       target: targetReadable,
-      reason: normalizedReason,
+      reason: body.reason,
       timestamp: new Date().toISOString(),
     });
 

@@ -16,6 +16,7 @@ export async function activateAccountController(
               throw new ServiceError(401, "Unauthorized");
           }
           const adminId = req.user.uid
+        req.log.info(`Received reason: ${reason}`)
 
         await activateUserAccount(req.server, {
             reason,
