@@ -10,6 +10,9 @@ export async function activateUserAccount(
     body: disableUserAccountService
 ){
     try{
+
+        fastify.log.info(`Received reason in the service: ${body.reason}`)
+
         fastify.log.info(`[ACTIVATE] Starting activation for userId: ${body.userId} by adminId: ${body.adminId}`);
         
         const userRef = await fastify.db.collection('users').doc(body.userId).get();

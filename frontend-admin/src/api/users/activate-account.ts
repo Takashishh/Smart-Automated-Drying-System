@@ -5,6 +5,9 @@ export async function activateAccount(
   reason: string
 ) {
   try {
+
+    console.log('received reason: ', reason);
+
     const res = await fetch("http://localhost:3000/users/activate-account", {
       method: "POST",
       headers: getAuthHeaders(),

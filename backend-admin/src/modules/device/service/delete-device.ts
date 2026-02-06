@@ -20,7 +20,6 @@ export async function deleteDeviceService(
 
     const deviceData = doc.data();
 
-
     await createAuditFunction(fastify, {
         adminId: body.adminId,
         action: "device deleted",
