@@ -2,6 +2,8 @@ export type Role = 'admin' | 'super-admin';
 export interface User {
   userId: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   status: 'active' | 'disabled';
   createdDate: string;
@@ -71,8 +73,13 @@ export interface EmailTemplate {
 export interface EmailLog {
   id: string;
   sentBy: string;
+  sentByName?: string;
   recipient: string;
   templateName: string;
+  templateId?: string;
+  subject?: string;
   sentDate: string;
   status: 'sent' | 'failed';
+  variables?: Record<string, string>;
+  error?: string;
 }

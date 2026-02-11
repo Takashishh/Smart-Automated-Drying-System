@@ -10,6 +10,7 @@ import { deviceModRouter } from "./modules/device/router/index.js";
 import { auditModRouter } from "./modules/audit-logs/router/index.js";
 import { dashboardModRoute } from "./shared/dashboard/router/index.js";
 import { ticketsRouter } from "./modules/tickets/router/index.js";
+import { emailTemplatesRouter } from "./modules/email-templates/router/index.js";
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 
 
@@ -39,6 +40,7 @@ server.register(deviceModRouter, {prefix: "/devices"});
 server.register(auditModRouter, {prefix: "/audit-logs"});
 server.register(adminRoutes, {prefix: "/admin"});
 server.register(dashboardModRoute, {prefix: "/dashboard"})
+server.register(emailTemplatesRouter, {prefix: "/email-templates"})
 const PORT = Number(process.env.HTTP_PORT);
 const HOST = process.env.HOST as string;
 

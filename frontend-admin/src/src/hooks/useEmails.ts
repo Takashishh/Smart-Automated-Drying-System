@@ -1,65 +1,98 @@
 import { useState, useEffect } from 'react';
-import { EmailTemplate, EmailLog } from '../lib/types';
-const MOCK_TEMPLATES: EmailTemplate[] = [{
-  id: 'tpl-1',
-  name: 'Welcome Email',
-  subject: 'Welcome to WeatherSmart',
-  category: 'User Notification',
-  content: 'Dear {name},\n\nWelcome to WeatherSmart! Your account has been created successfully.\n\nBest regards,\nThe Team'
-}, {
-  id: 'tpl-2',
-  name: 'Ticket Resolved',
-  subject: 'Your Ticket Has Been Resolved',
-  category: 'Status Update',
-  content: 'Dear {name},\n\nYour ticket #{ticketId} has been marked as resolved. If you have further questions, please reply to this email.\n\nBest regards,\nSupport Team'
-}, {
-  id: 'tpl-3',
-  name: 'Maintenance Notice',
-  subject: 'Scheduled Maintenance',
-  category: 'General',
-  content: 'Dear User,\n\nWe will be performing scheduled maintenance on {date}. Service may be intermittent.\n\nThank you for your patience.'
-}];
-const MOCK_EMAIL_LOGS: EmailLog[] = [{
-  id: 'el-1',
-  sentBy: 'John Doe',
-  recipient: 'user@example.com',
-  templateName: 'Welcome Email',
-  sentDate: '2023-06-20T10:00:00Z',
-  status: 'sent'
-}];
+import { EmailTemplate, EmailLog, User, Admin } from '../lib/types';
+import { getEmailTemplates } from '../../api/email-templates/get-email-templates';
+import { sendEmail as sendEmailApi } from '../../api/email-templates/send-email';
+import { getEmailLogs as getEmailLogsApi } from '../../api/email-templates/get-email-logs';
+import { getUsers } from '../../api/users/get-users';
+import { getAdminsFromAPI } from '../../api/shared/get-admins';
+import { useAuth } from './useAuth';
+
+export interface EmailRecipient {
+  email: string;
+  name: string;
+  type: 'user' | 'admin';
+}
+
 export function useEmails() {
+  const { user } = useAuth();
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [logs, setLogs] = useState<EmailLog[]>([]);
+  const [recipients, setRecipients] = useState<EmailRecipient[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const fetchTemplates = async () => {
+    try {
+      const data = await getEmailTemplates();
+      setTemplates(data);
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+    }
+  };
+
+  const fetchLogs = async () => {
+    try {
+      const data = await getEmailLogsApi();
+      setLogs(data);
+    } catch (error) {
+      console.error('Error fetching logs:', error);
+    }
+  };
+
+  const fetchRecipients = async () => {
+    try {
+      const [usersData, adminsData] = await Promise.all([
+        getUsers().catch(() => []),
+        getAdminsFromAPI().catch(() => []),
+      ]);
+
+      const userRecipients: EmailRecipient[] = (usersData || []).map((u: User) => ({
+        email: u.email,
+        name: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.name || u.email,
+        type: 'user' as const,
+      }));
+
+      const adminRecipients: EmailRecipient[] = (adminsData || []).map((a: Admin) => ({
+        email: a.email,
+        name: `${a.firstName || ''} ${a.lastName || ''}`.trim() || a.email,
+        type: 'admin' as const,
+      }));
+
+      setRecipients([...userRecipients, ...adminRecipients]);
+    } catch (error) {
+      console.error('Error fetching recipients:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
-      await new Promise(resolve => setTimeout(resolve, 600));
-      setTemplates(MOCK_TEMPLATES);
-      setLogs(MOCK_EMAIL_LOGS);
+      setLoading(true);
+      await Promise.all([fetchTemplates(), fetchLogs(), fetchRecipients()]);
       setLoading(false);
     };
     fetchData();
   }, []);
-  const sendEmail = async (recipient: string, templateId: string) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const template = templates.find(t => t.id === templateId);
-    if (!template) throw new Error('Template not found');
-    const newLog: EmailLog = {
-      id: `el-${Date.now()}`,
-      sentBy: 'Current Admin',
-      // In real app, get from auth context
+
+  const sendEmail = async (recipient: string, templateId: string, variables?: Record<string, string>) => {
+    if (!user?.adminId) {
+      throw new Error('User not authenticated');
+    }
+
+    await sendEmailApi({
       recipient,
-      templateName: template.name,
-      sentDate: new Date().toISOString(),
-      status: 'sent'
-    };
-    setLogs(prev => [newLog, ...prev]);
-    return true;
+      templateId,
+      variables,
+      adminId: user.adminId,
+    });
+
+    // Refresh logs after sending
+    await fetchLogs();
   };
+
   return {
     templates,
     logs,
+    recipients,
     loading,
-    sendEmail
+    sendEmail,
   };
 }

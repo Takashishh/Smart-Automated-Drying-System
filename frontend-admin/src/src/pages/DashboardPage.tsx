@@ -62,13 +62,6 @@ export function DashboardPage() {
       subtext: `${ticketsCount} Total`,
       icon: Ticket,
       color: 'bg-blue-400'
-    },
-    {
-      name: 'System Status',
-      value: '99.9%',
-      subtext: 'Uptime',
-      icon: Activity,
-      color: 'bg-blue-700'
     }
   ];
 
@@ -92,17 +85,11 @@ export function DashboardPage() {
 
   const stats = isSuperAdmin ? superAdminStats : baseStats;
 
-  // Sample Recent Activity and System Health (replace with dynamic backend data if needed)
+  // Sample Recent Activity (replace with dynamic backend data if needed)
   const recentActivity = [
     { action: 'New device registered', entity: 'Rack-Sensor-01', time: '1h ago' },
     { action: 'User account created', entity: 'john@example.com', time: '2h ago' },
     { action: 'Ticket resolved', entity: '#T-1234', time: '3h ago' }
-  ];
-
-  const systemHealth = [
-    { name: 'Server Load', value: '24%', color: 'bg-blue-600', width: '24%' },
-    { name: 'Database Usage', value: '45%', color: 'bg-green-500', width: '45%' },
-    { name: 'API Latency', value: '120ms', color: 'bg-yellow-500', width: '15%' }
   ];
 
   return (
@@ -143,8 +130,8 @@ export function DashboardPage() {
         ))}
       </div>
 
-      {/* Recent Activity & System Health */}
-      <div className="mt-6 sm:mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+      {/* Recent Activity */}
+      <div className="mt-6 sm:mt-8">
         <Card title="Recent Activity" className="min-h-[300px]">
           <div className="flow-root">
             <ul className="-mb-8">
@@ -176,22 +163,6 @@ export function DashboardPage() {
                 </li>
               ))}
             </ul>
-          </div>
-        </Card>
-
-        <Card title="System Health" className="min-h-[300px]">
-          <div className="space-y-4">
-            {systemHealth.map((item, idx) => (
-              <div key={idx}>
-                <div className="flex justify-between text-sm font-medium mb-1">
-                  <span>{item.name}</span>
-                  <span>{item.value}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div className={`${item.color} h-2.5 rounded-full transition-all duration-500`} style={{ width: item.width }} />
-                </div>
-              </div>
-            ))}
           </div>
         </Card>
       </div>

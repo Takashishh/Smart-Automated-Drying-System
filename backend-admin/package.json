@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "npx ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "migrate:email-templates": "npx ts-node src/migrations/migrate-email-templates.ts"
   },
   "keywords": [],
   "author": "Jeffrey Aspiras",
