@@ -17,14 +17,17 @@ export async function deleteTickets(
       throw new ServiceError(404, "Ticket not found");
     }
 
+    const data = snapshot.data()!;
+
     await ticketRef.delete();
 
     // Attempt to create an audit log but don't fail the whole operation if audit logging errors
     try {
+      const ticketTarget = `Ticket #${body.ticketId.slice(0, 8)} - ${data.userName || 'Unknown'} (${data.email || 'N/A'})`;
       await createAuditFunction(fastify, {
         adminId: body.adminId,
         action: "Ticket Deleted",
-        target: body.ticketId
+        target: ticketTarget
       });
     } catch (auditErr) {
       fastify.log.warn({ err: auditErr }, 'Failed to create audit log for ticket delete');

@@ -70,6 +70,14 @@ export function useEmails() {
       setLoading(false);
     };
     fetchData();
+
+    // Poll for new logs every 30 seconds
+    const pollInterval = setInterval(() => {
+      fetchLogs();
+    }, 30000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(pollInterval);
   }, []);
 
   const sendEmail = async (recipient: string, templateId: string, variables?: Record<string, string>) => {

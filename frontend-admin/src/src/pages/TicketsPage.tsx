@@ -131,23 +131,7 @@ export function TicketsPage() {
       await updateStatus(action.ticketId, action.status);
       toast.success(`Ticket marked as ${statusLabel(action.status)}`);
     } catch (err: unknown) {
-      // try to show helpful server message when available
-      let msg = 'Failed to update ticket status';
-      if (err instanceof Error && err.message) {
-        try {
-          // sometimes message contains JSON payload after status e.g. "Failed to update ticket: 404 {\"message\":\"Ticket not found\"}"
-          const jsonPart = err.message.match(/\{.*\}$/)?.[0];
-          if (jsonPart) {
-            const parsed = JSON.parse(jsonPart);
-            msg = parsed.message ? `${msg}: ${parsed.message}` : `${msg}: ${err.message}`;
-          } else {
-            msg = `${msg}: ${err.message}`;
-          }
-        } catch (_) {
-          msg = `${msg}: ${err.message}`;
-        }
-      }
-      toast.error(msg);
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -160,23 +144,9 @@ export function TicketsPage() {
     setIsProcessing(true);
     try {
       await deleteTicket(id);
-      toast.success('Ticket deleted successfully');
+      toast.success('Ticket removed');
     } catch (err: unknown) {
-      let msg = 'Failed to delete ticket';
-      if (err instanceof Error && err.message) {
-        try {
-          const jsonPart = err.message.match(/\{.*\}$/)?.[0];
-          if (jsonPart) {
-            const parsed = JSON.parse(jsonPart);
-            msg = parsed.message ? `${msg}: ${parsed.message}` : `${msg}: ${err.message}`;
-          } else {
-            msg = `${msg}: ${err.message}`;
-          }
-        } catch (_) {
-          msg = `${msg}: ${err.message}`;
-        }
-      }
-      toast.error(msg);
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -330,7 +300,7 @@ export function TicketsPage() {
         ) : error ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
             <AlertCircle className="mx-auto h-10 w-10 text-red-500 mb-2" />
-            <p className="text-sm sm:text-base text-gray-700">Unable to load tickets</p>
+            <p className="text-sm sm:text-base text-gray-700">Couldn\'t load the tickets</p>
             <p className="text-xs sm:text-sm text-gray-500">{error}</p>
           </motion.div>
         ) : filteredAndSortedTickets.length === 0 ? (

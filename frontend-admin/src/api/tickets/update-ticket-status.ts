@@ -16,7 +16,7 @@ export async function updateTicketStatus(
 
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error(`Failed to update ticket: ${res.status} ${errorText}`);
+      throw new Error('Failed to update ticket');
     }
 
     const json = await res.json();

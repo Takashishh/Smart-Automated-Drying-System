@@ -17,7 +17,7 @@ export async function getEmailTemplates(category?: string) {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || "Failed to fetch email templates");
+    throw new Error('Failed to fetch templates');
   }
 
   const data = await response.json();

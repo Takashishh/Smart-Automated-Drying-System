@@ -1,13 +1,34 @@
 import type { FastifyInstance } from "fastify";
 import { ServiceError } from "../../error/service-error.js";
+import type { PaginationMetadata } from "../schema.js";
 
-export async function getAdmins(fastify: FastifyInstance) {
+export async function getAdmins(fastify: FastifyInstance, page: number = 1, limit: number = 10) {
   try {
-    const adminsSnapshot = await fastify.db.collection("admins").get();
+    // Get total count
+    const totalSnapshot = await fastify.db.collection("admins").count().get();
+    const totalItems = totalSnapshot.data().count;
 
-    if (adminsSnapshot.empty) {
-      return [];
+    if (totalItems === 0) {
+      return {
+        admins: [],
+        pagination: {
+          currentPage: page,
+          pageSize: limit,
+          totalItems: 0,
+          totalPages: 0,
+        },
+      };
     }
+
+    // Calculate offset
+    const offset = (page - 1) * limit;
+
+    // Fetch paginated data
+    const adminsSnapshot = await fastify.db
+      .collection("admins")
+      .offset(offset)
+      .limit(limit)
+      .get();
 
     const admins = adminsSnapshot.docs.map((doc) => {
       const data = doc.data();
@@ -26,7 +47,16 @@ export async function getAdmins(fastify: FastifyInstance) {
       };
     });
 
-    return admins;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const pagination: PaginationMetadata = {
+      currentPage: page,
+      pageSize: limit,
+      totalItems,
+      totalPages,
+    };
+
+    return { admins, pagination };
   } catch (err: unknown) {
     fastify.log.error(err);
     const message = (err as { message?: string })?.message;

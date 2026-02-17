@@ -4,6 +4,7 @@ import { SendEmailBody, GetTemplatesQuery } from "../schema/email-schemas.js";
 import { sendEmailController } from "../controller/send-email-controller.js";
 import { getTemplatesController } from "../controller/get-templates-controller.js";
 import { getEmailLogsController } from "../controller/get-email-logs-controller.js";
+import { paginationQuerySchema } from "../../../shared/schema.js";
 
 export function emailTemplatesRouter(fastify: FastifyInstance) {
   fastify.route({
@@ -29,6 +30,9 @@ export function emailTemplatesRouter(fastify: FastifyInstance) {
   fastify.route({
     url: "/get-email-logs",
     method: "GET",
+    schema: {
+      querystring: paginationQuerySchema,
+    },
     preHandler: firebaseAuthPreHandler,
     handler: getEmailLogsController,
   });

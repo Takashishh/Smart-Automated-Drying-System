@@ -59,7 +59,7 @@ export function TicketsPage({ user, onNavigate }: TicketsPageProps) {
       setTimeout(() => setStatus('idle'), 2500);
     } catch (err) {
       setStatus('error');
-      setErrorMessage(err instanceof Error ? err.message : 'Unable to send ticket right now.');
+      setErrorMessage(err instanceof Error ? err.message : 'Couldn\'t submit the ticket. Please try again.');
     }
   };
 

@@ -13,6 +13,7 @@ import { getDeviceInfoController } from "../controller/get-device-info-controlle
 import { getDevicesController } from "../controller/get-devices-controller.js";
 import { unassignDeviceController } from "../controller/unassign-device-controller.js";
 import { updateDeviceMacId } from "../controller/update-device-id.js";
+import { paginationQuerySchema } from "../../../shared/schema.js";
 
 
 export function deviceModRouter(fastify: FastifyInstance){
@@ -55,6 +56,9 @@ export function deviceModRouter(fastify: FastifyInstance){
     fastify.route({
         url: "/get-devices",
         method: "GET",
+        schema: {
+            querystring: paginationQuerySchema,
+        },
         handler: getDevicesController
     })
 

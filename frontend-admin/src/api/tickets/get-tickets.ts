@@ -10,7 +10,7 @@ export async function getTickets() {
 
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error(`Failed to fetch tickets: ${res.status} ${errorText}`);
+      throw new Error('Failed to load tickets');
     }
 
     const json = await res.json();

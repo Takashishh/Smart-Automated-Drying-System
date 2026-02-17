@@ -1,17 +1,21 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { getUsersService } from "../service/get-users.js";
 import { ServiceError } from "../../../error/service-error.js";
+import type { PaginationQuery } from "../../../shared/schema.js";
 
 export async function getUserController(
-  req: FastifyRequest,
+  req: FastifyRequest<{ Querystring: PaginationQuery }>,
   reply: FastifyReply
 ) {
   try {
-    const users = await getUsersService(req.server);
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 10;
+    const result = await getUsersService(req.server, page, limit);
 
     return reply.code(200).send({
       message: "Successfully fetched users",
-      data: users,
+      data: result.users,
+      pagination: result.pagination,
     });
 
   } catch (err) {

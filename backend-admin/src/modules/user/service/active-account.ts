@@ -47,7 +47,7 @@ export async function activateUserAccount(
             adminId: body.adminId,
             action: "User Activated",
             target: body.userId,
-            reason: body.reason
+            reason: body.reason ?? ""
         })
         fastify.log.info(`[ACTIVATE] Audit log created successfully`);
         

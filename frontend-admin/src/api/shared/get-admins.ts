@@ -35,7 +35,7 @@ export async function getAdminsFromAPI(): Promise<AdminData[]> {
 
   if (!res.ok) {
     console.error("Failed to fetch admins:", json);
-    throw new Error(json?.message || "Failed to fetch admins");
+    throw new Error('Failed to load admins');
   }
 
   return json?.data ?? [];

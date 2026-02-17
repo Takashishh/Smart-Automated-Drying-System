@@ -8,7 +8,7 @@ export async function getUsers() {
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch users, status: ${res.status}`);
+      throw new Error('Failed to load users');
     }
 
     const json = await res.json();

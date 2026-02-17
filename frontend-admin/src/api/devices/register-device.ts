@@ -10,7 +10,7 @@ export async function registerDevice(macId: string) {
 
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error(`Failed to register device: ${res.status} ${errorText}`);
+      throw new Error('Failed to register device');
     }
 
     const json = await res.json();

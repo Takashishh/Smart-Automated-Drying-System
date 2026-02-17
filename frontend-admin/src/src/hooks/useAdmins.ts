@@ -41,6 +41,14 @@ export function useAdmins() {
     };
     
     fetchAdmins();
+
+    // Poll for new admins every 30 seconds
+    const pollInterval = setInterval(() => {
+      fetchAdmins();
+    }, 30000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(pollInterval);
   }, []);
   const createAdmin = async (data: CreateAdminPayload) => {
     const apiResult = await createAdminAccount(data);

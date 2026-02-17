@@ -100,7 +100,7 @@ export function LoginPage() {
       navigate('/dashboard');
     } catch (err: any) {
       // If account is disabled, show a clear message and don't count it as a failed attempt
-      const msg = err?.message || 'Failed to login';
+      const msg = err?.message || 'Couldn\'t sign in. Please check your credentials.';
       if (typeof msg === 'string' && msg.toLowerCase().includes('disabled')) {
         setError('Your account has been disabled. Please contact a Super-Admin to re-activate your account.');
       } else {

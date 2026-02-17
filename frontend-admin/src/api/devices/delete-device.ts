@@ -13,7 +13,7 @@ export async function deleteDevice(
 
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error(`Failed to register device: ${res.status} ${errorText}`);
+      throw new Error('Failed to delete device');
     }
 
     return true;

@@ -20,7 +20,7 @@ export async function createTicket(
 
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error(`Failed to create ticket: ${res.status} ${errorText}`);
+      throw new Error('Failed to create ticket');
     }
 
     const json = await res.json();

@@ -11,6 +11,8 @@ export type SendEmailBodyType = Static<typeof SendEmailBody>;
 
 export const GetTemplatesQuery = Type.Object({
   category: Type.Optional(Type.String()),
+  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, default: 10 })),
 });
 
 export type GetTemplatesQueryType = Static<typeof GetTemplatesQuery>;

@@ -49,18 +49,18 @@ export function EmailTemplatesPage() {
     const isValidRecipient = recipients.some(r => r.email === recipient);
     if (!isValidRecipient) {
       setRecipientError('Please select a registered user or admin');
-      toast.error('Invalid recipient email');
+      toast.error('Please enter a valid email address');
       return;
     }
-    
+
     setRecipientError('');
     setIsSending(true);
     try {
       await sendEmail(recipient, selectedTemplate, variables);
-      toast.success('Email sent successfully');
+      toast.success('Email sent!');
       handleCloseModal();
     } catch (error) {
-      toast.error('Failed to send email');
+      toast.error('Couldn\'t send the email. Please try again.');
     } finally {
       setIsSending(false);
     }
@@ -232,7 +232,7 @@ export function EmailTemplatesPage() {
               <p className="text-xs text-gray-500 mt-0.5">Latest email notifications sent</p>
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
               {loading ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="text-center">
@@ -249,7 +249,7 @@ export function EmailTemplatesPage() {
                   <p className="text-xs text-gray-500 mt-1">Your email history will appear here</p>
                 </div>
               ) : (
-                logs.slice(0, 5).map((log, index) => (
+                logs.map((log, index) => (
                   <div 
                     key={log.id}
                     onClick={() => {
@@ -289,14 +289,6 @@ export function EmailTemplatesPage() {
                 ))
               )}
             </div>
-            
-            {logs.length > 5 && (
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <button className="text-sm text-blue-600 hover:text-blue-700 font-medium w-full text-center">
-                  View all activity →
-                </button>
-              </div>
-            )}
           </Card>
         </div>
       </div>

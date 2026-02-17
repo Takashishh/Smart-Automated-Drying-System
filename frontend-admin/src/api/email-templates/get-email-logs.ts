@@ -12,7 +12,7 @@ export async function getEmailLogs() {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || "Failed to fetch email logs");
+    throw new Error('Failed to fetch logs');
   }
 
   const data = await response.json();

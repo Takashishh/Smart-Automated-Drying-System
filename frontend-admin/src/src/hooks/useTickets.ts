@@ -9,12 +9,11 @@ export function useTickets() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchTickets = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getTickets();
+  const fetchTickets = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getTickets();
         
         // Ensure data is an array
         if (!Array.isArray(data)) {
@@ -70,7 +69,16 @@ export function useTickets() {
       }
     };
 
+  useEffect(() => {
     fetchTickets();
+
+    // Poll for new tickets every 30 seconds
+    const pollInterval = setInterval(() => {
+      fetchTickets();
+    }, 30000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(pollInterval);
   }, []);
 
   const updateStatus = async (ticketId: string, status: TicketStatus) => {

@@ -13,9 +13,7 @@ export async function sendPasswordReset(
 
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error(
-        `Failed to send password reset: ${res.status} ${errorText}`
-      );
+      throw new Error('Failed to send password reset');
     }
 
     const json = await res.json();

@@ -28,7 +28,7 @@ export function AccountSettingsPage({ user, onNavigate }: AccountSettingsPagePro
     lastName: '',
     contactNumber: '',
     address: '',
-    email: user?.email || ''
+    email: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -52,17 +52,17 @@ export function AccountSettingsPage({ user, onNavigate }: AccountSettingsPagePro
           lastName: data.lastName || '',
           contactNumber: data.contactNumber || '',
           address: data.address || '',
-          email: data.email || ''
+          email: data.email || user?.email || ''
         });
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load account');
+        setError(err instanceof Error ? err.message : 'Couldn\'t load your account. Please refresh the page.');
       } finally {
         setLoading(false);
       }
     };
 
     load();
-  }, [userId, onNavigate]);
+  }, [userId, onNavigate, user?.email]);
 
   const handleChange = (key: keyof FormState, value: string) => {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -78,11 +78,11 @@ export function AccountSettingsPage({ user, onNavigate }: AccountSettingsPagePro
       const payload = { ...form };
       delete (payload as any).email; // email is read-only here
       await updateUser(userId, payload);
-      setSuccess('Account updated successfully');
+      setSuccess('Your account has been updated!');
       const storedUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
       localStorage.setItem('auth_user', JSON.stringify({ ...storedUser, ...payload }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Update failed');
+      setError(err instanceof Error ? err.message : 'Couldn\'t update your account. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -109,45 +109,58 @@ export function AccountSettingsPage({ user, onNavigate }: AccountSettingsPagePro
             <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
             <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-700">
               <Mail className="w-5 h-5 text-gray-400" />
-              <span>{form.email || '—'}</span>
+              <span>{form.email || 'Loading...'}</span>
             </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Display Name</label>
-              <input value={form.displayName} onChange={(e) => handleChange('displayName', e.target.value)} className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none" placeholder="How your name appears" />
+              <label className="block text-sm font-semibold text-gray-700 mb-1">First Name</label>
+              <p className="text-xs text-blue-600 mb-2">Current: <span className="font-semibold">{form.firstName || 'Not set'}</span></p>
+              <input 
+                type="text" 
+                value={form.firstName} 
+                onChange={(e) => handleChange('firstName', e.target.value)} 
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none bg-white text-gray-900 text-base"
+              />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
-              <input value={form.firstName} onChange={(e) => handleChange('firstName', e.target.value)} className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none" />
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Last Name</label>
+              <p className="text-xs text-blue-600 mb-2">Current: <span className="font-semibold">{form.lastName || 'Not set'}</span></p>
+              <input 
+                type="text" 
+                value={form.lastName} 
+                onChange={(e) => handleChange('lastName', e.target.value)} 
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none bg-white text-gray-900 text-base"
+              />
             </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
-              <input value={form.firstName} onChange={(e) => handleChange('firstName', e.target.value)} className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none" />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
-              <input value={form.lastName} onChange={(e) => handleChange('lastName', e.target.value)} className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none" />
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Contact Number</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Contact Number</label>
+              <p className="text-xs text-blue-600 mb-2">Current: <span className="font-semibold">{form.contactNumber || 'Not set'}</span></p>
               <div className="relative">
                 <Phone className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input value={form.contactNumber} onChange={(e) => handleChange('contactNumber', e.target.value)} className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none" placeholder="+63" />
+                <input 
+                  type="text" 
+                  value={form.contactNumber} 
+                  onChange={(e) => handleChange('contactNumber', e.target.value)} 
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none bg-white text-gray-900 text-base"
+                />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Address</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Address</label>
+              <p className="text-xs text-blue-600 mb-2">Current: <span className="font-semibold">{form.address || 'Not set'}</span></p>
               <div className="relative">
                 <MapPin className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input value={form.address} onChange={(e) => handleChange('address', e.target.value)} className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none" placeholder="City, Country" />
+                <input 
+                  type="text" 
+                  value={form.address} 
+                  onChange={(e) => handleChange('address', e.target.value)} 
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none bg-white text-gray-900 text-base"
+                />
               </div>
             </div>
           </div>

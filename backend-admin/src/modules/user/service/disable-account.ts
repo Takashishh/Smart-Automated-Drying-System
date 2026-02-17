@@ -42,7 +42,7 @@ export async function disableUserAccount(
             adminId: body.adminId,
             action: "User Disabled",
             target: body.userId,
-            reason: body.reason
+            reason: body.reason ?? ""
         })
         fastify.log.info(`[DISABLE] Audit log created successfully`);
         

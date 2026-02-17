@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { createAdminAccountSchema, signinReq } from "../schema.js";
+import { createAdminAccountSchema, signinReq, paginationQuerySchema } from "../schema.js";
 import { SignInController } from "../controller/signin-controller.js";
 import { firebaseAuthPreHandler } from "../../plugin/firebase-plug.js";
 import { createAdminAccountController } from "../controller/create-admin-controller.js";
@@ -35,6 +35,9 @@ export function adminRoutes(fastify: FastifyInstance) {
   fastify.route({
     url: "/get-admins",
     method: "GET",
+    schema: {
+      querystring: paginationQuerySchema,
+    },
     preHandler: firebaseAuthPreHandler,
     handler: getAdminsController,
   });

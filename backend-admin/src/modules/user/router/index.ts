@@ -8,11 +8,15 @@ import { activateAccountController } from "../controller/activate-account-contro
 import { updateUserSchema } from "../schemas/update-user-schema.js";
 import { updateUserController } from "../controller/update-user-controller.js";
 import { disableAccountController } from "../controller/disable-account-controller.js";
+import { paginationQuerySchema } from "../../../shared/schema.js";
 
 export function userModRoutes(fastify: FastifyInstance){
     fastify.route({
         url: '/get-users',
         method: 'GET',
+        schema: {
+            querystring: paginationQuerySchema,
+        },
         handler: getUserController
     })
 
@@ -25,6 +29,7 @@ export function userModRoutes(fastify: FastifyInstance){
     fastify.route({
         url: '/update-user/:userId',
         method: 'PATCH',
+        preHandler: firebaseAuthPreHandler,
         schema: {
             body: updateUserSchema
         },

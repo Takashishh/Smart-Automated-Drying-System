@@ -8,7 +8,7 @@ export async function getDashboardData() {
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch dashboard data: ${res.status} ${res.statusText}`);
+      throw new Error('Failed to load dashboard');
     }
 
     const json = await res.json(); 

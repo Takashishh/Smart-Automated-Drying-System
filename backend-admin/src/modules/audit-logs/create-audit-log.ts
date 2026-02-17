@@ -25,6 +25,17 @@ export async function searchIfAdmin(fastify: FastifyInstance, targetId: string) 
 }
 
 /**
+ * Search for a ticket by ID and return its readable string
+ */
+export async function searchIfTicket(fastify: FastifyInstance, targetId: string) {
+  const ticketDoc = await fastify.db.collection("tickets").doc(targetId).get();
+  if (!ticketDoc.exists) return null;
+
+  const data = ticketDoc.data()!;
+  return `Ticket #${targetId.slice(0, 8)} - ${data.userName || data.email || 'Unknown'} (${data.issueType || 'General'})`;
+}
+
+/**
  * Creates an audit log entry
  */
 export async function createAuditFunction(
@@ -52,28 +63,43 @@ export async function createAuditFunction(
     fastify.log.info(`normalized reason value: ${normalizedReason}`)
 
     // 3️⃣ Replace targetId with readable name if possible
+    // If target is already pre-formatted (starts with "Ticket #"), keep it as is
     let targetReadable: string = body.target;
 
-    // Try user first
-    const userReadable = await searchIfUser(fastify, body.target);
-    if (userReadable) {
-      targetReadable = userReadable;
-    } else {
-      // Then try admin
-      const adminReadable = await searchIfAdmin(fastify, body.target);
-      if (adminReadable) {
-        targetReadable = adminReadable;
+    if (!targetReadable.startsWith("Ticket #")) {
+      // Try ticket first (for ticket-related actions)
+      const ticketReadable = await searchIfTicket(fastify, body.target);
+      if (ticketReadable) {
+        targetReadable = ticketReadable;
+      } else {
+        // Try user next
+        const userReadable = await searchIfUser(fastify, body.target);
+        if (userReadable) {
+          targetReadable = userReadable;
+        } else {
+          // Then try admin
+          const adminReadable = await searchIfAdmin(fastify, body.target);
+          if (adminReadable) {
+            targetReadable = adminReadable;
+          }
+        }
       }
     }
 
-    const audit = await fastify.db.collection("audit_logs").add({
+    // Build the audit object, only including reason if it has a value
+    const auditData: Record<string, any> = {
       performedBy: `${adminData.firstName} ${adminData.lastName} (${adminData.email})`,
       action: body.action,
       target: targetReadable,
-      // use normalized reason to avoid writing `undefined` into Firestore
-      reason: normalizedReason,
       timestamp: new Date().toISOString(),
-    });
+    };
+    
+    // Only include reason field if it has a value
+    if (normalizedReason) {
+      auditData.reason = normalizedReason;
+    }
+
+    const audit = await fastify.db.collection("audit_logs").add(auditData);
 
     fastify.log.info(`Successfully added an audit log`);
     return { auditId: audit.id };

@@ -1,20 +1,41 @@
 import type { FastifyInstance } from "fastify";
 import { ServiceError } from "../../../error/service-error.js";
+import type { PaginationMetadata } from "../../../shared/schema.js";
 
 export async function getEmailLogs(
   fastify: FastifyInstance,
-  limit: number = 50
+  page: number = 1,
+  limit: number = 10
 ) {
   try {
-    const snapshot = await fastify.db
+    const query = fastify.db
       .collection("email-logs")
-      .orderBy("sentDate", "desc")
+      .orderBy("sentDate", "desc");
+
+    // Get total count
+    const countSnapshot = await query.count().get();
+    const totalItems = countSnapshot.data().count;
+
+    if (totalItems === 0) {
+      return {
+        logs: [],
+        pagination: {
+          currentPage: page,
+          pageSize: limit,
+          totalItems: 0,
+          totalPages: 0,
+        },
+      };
+    }
+
+    // Calculate offset
+    const offset = (page - 1) * limit;
+
+    // Fetch paginated data
+    const snapshot = await query
+      .offset(offset)
       .limit(limit)
       .get();
-
-    if (snapshot.empty) {
-      return [];
-    }
 
     const logs: any[] = snapshot.docs.map(doc => ({
       id: doc.id,
@@ -48,7 +69,16 @@ export async function getEmailLogs(
       })
     );
 
-    return logsWithAdminNames;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const pagination: PaginationMetadata = {
+      currentPage: page,
+      pageSize: limit,
+      totalItems,
+      totalPages,
+    };
+
+    return { logs: logsWithAdminNames, pagination };
   } catch (err) {
     fastify.log.error(err);
     throw new ServiceError(500, "Failed to fetch email logs");

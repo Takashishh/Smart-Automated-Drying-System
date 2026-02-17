@@ -8,11 +8,14 @@ export async function getTemplatesController(
   reply: FastifyReply
 ) {
   try {
-    const templates = await getTemplates(req.server, req.query.category);
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 10;
+    const result = await getTemplates(req.server, req.query.category, page, limit);
 
     return reply.code(200).send({
       message: "Templates fetched successfully",
-      data: templates,
+      data: result.templates,
+      pagination: result.pagination,
     });
   } catch (err: unknown) {
     if (err instanceof ServiceError) {

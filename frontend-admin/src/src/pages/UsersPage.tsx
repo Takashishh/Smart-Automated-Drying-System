@@ -16,7 +16,7 @@ export function UsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  // Fetch users on mount
+  // Fetch users on mount and poll every 30 seconds
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -31,6 +31,14 @@ export function UsersPage() {
       }
     };
     fetchUsers();
+
+    // Poll for new users every 30 seconds
+    const pollInterval = setInterval(() => {
+      fetchUsers();
+    }, 30000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(pollInterval);
   }, []);
 
   // Filtered & searchable list

@@ -17,7 +17,7 @@ export async function unassignDevice(
         });
 
         if (!res.ok) {
-            throw new Error(`Failed to unassign device: ${res.status} ${res.statusText}`);
+            throw new Error('Failed to remove device');
         }
 
         const json = await res.json();

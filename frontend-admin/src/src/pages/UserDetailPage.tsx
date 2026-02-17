@@ -36,7 +36,7 @@ export function UserDetailPage() {
         setUser(userData);
       } catch (err) {
         console.error('Error fetching user info:', err);
-        toast.error('Failed to fetch user info');
+        toast.error('Couldn\'t load user information. Please refresh the page.');
       } finally {
         setLoading(false);
       }
@@ -71,7 +71,7 @@ export function UserDetailPage() {
     
     // Validate reason input
     if (!reason.trim()) {
-      toast.error('Please provide a reason for this action');
+      toast.error('Please tell us why (this is required)');
       return;
     }
 
@@ -80,18 +80,18 @@ export function UserDetailPage() {
       if (confirmAction.type === 'toggleStatus') {
         if (user.status === 'activated') {
           await disableAccount(user.uuid, reason);
-          toast.success('User account disabled successfully');
+          toast.success('User account has been disabled');
         } else {
           await activateAccount(user.uuid, reason);
-          toast.success('User account activated successfully');
+          toast.success('User account has been activated');
         }
       } else if (confirmAction.type === 'resetPassword') {
         await sendPasswordReset(user.uuid, reason);
-        toast.success('Password reset email sent successfully');
+        toast.success('Password reset email has been sent');
       } else if (confirmAction.type === 'unassignDevice') {
         // TODO: Call your unassign device API here
         // await unassignDeviceAPI(confirmAction.payload.deviceId, user.uuid);
-        toast.success('Device unassigned successfully');
+        toast.success('Device removed from user');
       }
 
       // Refresh user info after actions
@@ -102,7 +102,7 @@ export function UserDetailPage() {
       setReason('');
     } catch (err) {
       console.error('Action failed:', err);
-      toast.error(err instanceof Error ? err.message : 'Action failed');
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setIsProcessing(false);
     }

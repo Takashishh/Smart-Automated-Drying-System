@@ -22,7 +22,7 @@ export async function changeAdminPassword(data: ChangePasswordPayload): Promise<
     const response = await res.json();
 
     if (!res.ok) {
-      throw new Error(response.message || 'Failed to change password');
+      throw new Error('Failed to change password');
     }
   } catch (err: unknown) {
     console.error('Error changing password:', err);

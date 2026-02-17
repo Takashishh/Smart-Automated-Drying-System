@@ -43,6 +43,14 @@ export function DevicesPage() {
 
   useEffect(() => {
     fetchDevices();
+
+    // Poll for new devices every 30 seconds
+    const pollInterval = setInterval(() => {
+      fetchDevices();
+    }, 30000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(pollInterval);
   }, []);
 
   const fetchDevices = async () => {
@@ -81,7 +89,7 @@ export function DevicesPage() {
       
       setDevices(transformedDevices);
     } catch (error) {
-      toast.error('Failed to load devices');
+      toast.error('Couldn\'t load your devices. Please refresh the page.');
       console.error('Error loading devices:', error);
     } finally {
       setLoading(false);
@@ -98,11 +106,11 @@ export function DevicesPage() {
   const handleCreate = async (macId: string) => {
     try {
       await registerDevice(macId);
-      toast.success('Device registered successfully');
+      toast.success('Device added to your system!');
       setIsCreateModalOpen(false);
       await fetchDevices();
     } catch (error) {
-      toast.error('Failed to register device');
+      toast.error('Couldn\'t add the device. Please check the device ID and try again.');
       throw error;
     }
   };
@@ -117,7 +125,7 @@ export function DevicesPage() {
       setSelectedDevice(null);
       await fetchDevices();
     } catch (error) {
-      toast.error('Failed to assign device');
+      toast.error('Couldn\'t assign the device. Please try again.');
       console.error('Error assigning device:', error);
       throw error;
     }
@@ -133,11 +141,11 @@ export function DevicesPage() {
         `Unassigned from ${unassignAction.userName}`
       );
       
-      toast.success(`Device unassigned from ${unassignAction.userName}`);
+      toast.success(`Device removed from ${unassignAction.userName}`);
       setUnassignAction(null);
       await fetchDevices();
     } catch (error) {
-      toast.error('Failed to unassign device');
+      toast.error('Couldn\'t remove the device. Please try again.');
       console.error('Error unassigning device:', error);
     } finally {
       setIsProcessing(false);
@@ -161,14 +169,14 @@ export function DevicesPage() {
     try {
       await updateDevice(editTarget.deviceId, editMac, editReason.trim());
       
-      toast.success('Device MAC address updated successfully');
+      toast.success('Device information updated!');
       setEditTarget(null);
       setEditMac('');
       setEditReason('');
       setIsEditConfirmOpen(false);
       await fetchDevices();
     } catch (error) {
-      toast.error('Failed to update device');
+      toast.error('Couldn\'t update the device. Please try again.');
       console.error('Error updating device:', error);
     } finally {
       setIsSavingEdit(false);
@@ -181,12 +189,12 @@ export function DevicesPage() {
     try {
       await deleteDevice(deleteTarget.deviceId, deleteReason.trim());
       
-      toast.success('Device deleted successfully');
+      toast.success('Device removed from your system');
       setDeleteTarget(null);
       setDeleteReason('');
       await fetchDevices();
     } catch (error) {
-      toast.error('Failed to delete device');
+      toast.error('Couldn\'t delete the device. Please try again.');
       console.error('Error deleting device:', error);
     } finally {
       setIsDeleting(false);

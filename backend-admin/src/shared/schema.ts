@@ -49,3 +49,19 @@ export const createAdminAccountSchema = Type.Object({
 });
 
 export type createAdminAccountType = Static<typeof createAdminAccountSchema>;
+
+// Pagination query schema
+export const paginationQuerySchema = Type.Object({
+  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, default: 10 }))
+});
+
+export type PaginationQuery = Static<typeof paginationQuerySchema>;
+
+// Pagination response metadata
+export interface PaginationMetadata {
+  currentPage: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}

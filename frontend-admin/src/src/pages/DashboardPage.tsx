@@ -29,6 +29,14 @@ export function DashboardPage() {
       }
     };
     fetchData();
+
+    // Poll for dashboard updates every 30 seconds
+    const pollInterval = setInterval(() => {
+      fetchData();
+    }, 30000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(pollInterval);
   }, []);
 
   if (authLoading || loading) return <div className="p-4">Loading...</div>;

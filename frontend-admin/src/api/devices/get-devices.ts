@@ -12,7 +12,7 @@ export async function getDevices() {
     console.log('🔵 Response status:', res.status, res.statusText);
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch devices: ${res.status} ${res.statusText}`);
+      throw new Error('Failed to load devices');
     }
 
     const json = await res.json();

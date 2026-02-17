@@ -125,7 +125,7 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
         const remainingAttempts = MAX_LOGIN_ATTEMPTS - newAttempts;
         setStatus('error');
         setErrorMessage(
-          `${err instanceof Error ? err.message : 'Failed to login'}. ${remainingAttempts} attempt${
+          `${err instanceof Error ? err.message : 'Couldn\'t sign in'}. ${remainingAttempts} attempt${
             remainingAttempts !== 1 ? 's' : ''
           } remaining.`
         );

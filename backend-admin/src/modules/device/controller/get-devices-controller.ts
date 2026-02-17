@@ -1,16 +1,21 @@
 import type { FastifyRequest, FastifyReply} from "fastify";
 import { ServiceError } from "../../../error/service-error.js";
 import { getDeviceService } from "../service/get-devices.js";
+import type { PaginationQuery } from "../../../shared/schema.js";
+
 export async function getDevicesController(
-    req: FastifyRequest,
+    req: FastifyRequest<{ Querystring: PaginationQuery }>,
     reply: FastifyReply
 ){
     try{
-        const devices = await getDeviceService(req.server);
+        const page = req.query.page || 1;
+        const limit = req.query.limit || 10;
+        const result = await getDeviceService(req.server, page, limit);
 
         return reply.code(200).send({
             message: "Successfully fetched devices",
-            data: devices
+            data: result.devices,
+            pagination: result.pagination,
         })
 
     }catch(err: unknown){

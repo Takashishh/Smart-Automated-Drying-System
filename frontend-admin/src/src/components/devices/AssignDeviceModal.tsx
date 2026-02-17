@@ -52,7 +52,7 @@ export function AssignDeviceModal({
       const data = await getUsers();
       setUsers(data);
     } catch (error) {
-      toast.error('Failed to load users');
+      toast.error('Couldn\'t load users. Please try again.');
       console.error('Error loading users:', error);
     } finally {
       setLoading(false);

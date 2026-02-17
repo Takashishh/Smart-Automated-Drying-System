@@ -37,10 +37,10 @@ export function AdminDetailPage() {
     setIsProcessing(true);
     try {
       await toggleAdminStatus(admin.adminId);
-      toast.success(`Admin account ${admin.status === 'active' ? 'disabled' : 'enabled'} successfully`);
+      toast.success(`Admin account has been ${admin.status === 'active' ? 'disabled' : 'activated'}`);
       setIsConfirmOpen(false);
     } catch (error) {
-      toast.error('Failed to update admin status');
+      toast.error('Couldn\'t update the admin account. Please try again.');
     } finally {
       setIsProcessing(false);
     }

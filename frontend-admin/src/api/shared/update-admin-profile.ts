@@ -27,7 +27,7 @@ export async function updateAdminProfile(data: UpdateProfilePayload): Promise<Ad
     const response = await res.json();
 
     if (!res.ok) {
-      throw new Error(response.message || 'Failed to update profile');
+      throw new Error('Failed to update profile');
     }
 
     return response.data;

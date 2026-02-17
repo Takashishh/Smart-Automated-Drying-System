@@ -41,10 +41,11 @@ export async function updateTicketStatus(
 
     // Attempt to create an audit log but don't fail the whole operation if audit logging errors
     try {
+      const ticketTarget = `Ticket #${body.ticketId.slice(0, 8)} - ${data.userName || 'Unknown'} (${data.email || 'N/A'})`;
       await createAuditFunction(fastify, {
         adminId: body.adminId,
         action: "Ticket Status Updated",
-        target: body.ticketId
+        target: ticketTarget
       });
     } catch (auditErr) {
       fastify.log.warn({ err: auditErr }, 'Failed to create audit log for ticket status update');

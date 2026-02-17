@@ -22,8 +22,7 @@ export async function sendEmail(params: SendEmailParams) {
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to send email");
+    throw new Error('Failed to send email');
   }
 
   const data = await response.json();

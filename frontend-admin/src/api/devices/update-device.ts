@@ -18,7 +18,7 @@ export async function updateDevice(
 
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error(`Failed to update device: ${res.status} ${errorText}`);
+      throw new Error('Failed to update device');
     }
 
     return macId; //optimistic ui udate

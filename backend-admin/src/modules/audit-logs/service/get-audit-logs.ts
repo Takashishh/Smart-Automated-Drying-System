@@ -1,13 +1,41 @@
 import type { FastifyInstance } from "fastify";
 import { ServiceError } from "../../../error/service-error.js";                         
 import { Timestamp } from "firebase-admin/firestore";
+import type { PaginationMetadata } from "../../../shared/schema.js";
+
 export async function getAuditLogs(
-    fastify: FastifyInstance
+    fastify: FastifyInstance,
+    page: number = 1,
+    limit: number = 10
 ){
     try{
-        const audits = await fastify.db.collection('audit_logs').get();
+        // Get total count
+        const totalSnapshot = await fastify.db.collection('audit_logs').count().get();
+        const totalItems = totalSnapshot.data().count;
 
-        return audits.docs.map(doc => {
+        if (totalItems === 0) {
+            return {
+                audits: [],
+                pagination: {
+                    currentPage: page,
+                    pageSize: limit,
+                    totalItems: 0,
+                    totalPages: 0,
+                },
+            };
+        }
+
+        // Calculate offset
+        const offset = (page - 1) * limit;
+
+        // Fetch paginated data
+        const auditsSnapshot = await fastify.db
+            .collection('audit_logs')
+            .offset(offset)
+            .limit(limit)
+            .get();
+
+        const audits = auditsSnapshot.docs.map(doc => {
             const data = doc.data();
 
             return {
@@ -17,7 +45,18 @@ export async function getAuditLogs(
                 target: data.target,
                 timestamp: data.timestamp
             }
-        })
+        });
+
+        const totalPages = Math.ceil(totalItems / limit);
+
+        const pagination: PaginationMetadata = {
+            currentPage: page,
+            pageSize: limit,
+            totalItems,
+            totalPages,
+        };
+
+        return { audits, pagination };
 
     }catch(err: unknown){
         fastify.log.error(`error occured in get audit log, error: ${err}`);

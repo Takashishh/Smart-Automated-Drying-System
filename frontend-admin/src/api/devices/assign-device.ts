@@ -17,7 +17,7 @@ export async function assignDevice(
         });
 
         if (!res.ok) {
-            throw new Error(`Failed to assign device: ${res.status} ${res.statusText}`);
+            throw new Error('Failed to assign device');
         }
 
         const json = await res.json();

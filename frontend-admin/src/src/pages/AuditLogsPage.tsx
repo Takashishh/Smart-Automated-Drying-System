@@ -6,7 +6,7 @@ import { Select } from '../components/ui/Select';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Modal } from '../components/ui/Modal';
-import { Download, Shield, Activity, Eye } from 'lucide-react';
+import { Download, Shield, Activity, Eye, ArrowUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { getAuditLogs } from '../../api/audit-logs/get-audit-logs';
 import { getAuditLogsInfo } from '../../api/audit-logs/get-audit-logs-info';
@@ -30,13 +30,22 @@ export function AuditLogsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc'); // 'desc' = newest first
   const [selectedLog, setSelectedLog] = useState<AuditLogDetail | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
-  // Fetch audit logs on mount
+  // Fetch audit logs on mount and poll every 30 seconds
   useEffect(() => {
     fetchAuditLogs();
+
+    // Poll for new logs every 30 seconds
+    const pollInterval = setInterval(() => {
+      fetchAuditLogs();
+    }, 30000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(pollInterval);
   }, []);
 
   const fetchAuditLogs = async () => {
@@ -46,7 +55,7 @@ export function AuditLogsPage() {
       setLogs(data);
     } catch (error) {
       console.error('Failed to fetch audit logs:', error);
-      toast.error('Failed to load audit logs');
+      toast.error('Couldn\'t load system records. Please refresh the page.');
     } finally {
       setLoading(false);
     }
@@ -62,12 +71,16 @@ export function AuditLogsPage() {
     
     const matchesAction = actionFilter === 'all' || log.action === actionFilter;
     return matchesSearch && matchesAction;
+  }).sort((a, b) => {
+    const dateA = new Date(a.timestamp).getTime();
+    const dateB = new Date(b.timestamp).getTime();
+    return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
   });
 
   const handleExport = () => {
     try {
       if (filteredLogs.length === 0) {
-        toast.error('No logs to export');
+        toast.error('There are no records to export');
         return;
       }
       
@@ -91,10 +104,10 @@ export function AuditLogsPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       
-      toast.success('Audit logs exported to CSV');
+      toast.success('System records downloaded!');
     } catch (error) {
       console.error('Export failed:', error);
-      toast.error('Failed to export audit logs');
+      toast.error('Couldn\'t download records. Please try again.');
     }
   };
 
@@ -108,7 +121,7 @@ export function AuditLogsPage() {
       setSelectedLog(detailData);
     } catch (error) {
       console.error('Failed to fetch audit log details:', error);
-      toast.error('Failed to load audit log details');
+      toast.error('Couldn\'t load record details. Please try again.');
       setIsModalOpen(false);
     } finally {
       setLoadingDetail(false);
@@ -162,7 +175,7 @@ export function AuditLogsPage() {
               onChange={e => setSearchTerm(e.target.value)} 
             />
           </div>
-          <div className="flex gap-3 w-full md:w-auto">
+          <div className="flex gap-3 w-full md:w-auto flex-wrap">
             <Select 
               options={[
                 { value: 'all', label: 'All Actions' },
@@ -181,6 +194,13 @@ export function AuditLogsPage() {
               onChange={e => setActionFilter(e.target.value)} 
               className="mb-0 w-48" 
             />
+            <Button 
+              variant={sortOrder === 'desc' ? 'primary' : 'outline'}
+              onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+              leftIcon={<ArrowUpDown className="h-4 w-4" />}
+            >
+              {sortOrder === 'desc' ? 'Newest' : 'Oldest'}
+            </Button>
             <Button 
               variant="outline" 
               onClick={handleExport}

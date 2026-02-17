@@ -16,9 +16,7 @@ export async function activateAccount(
 
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error(
-        `Failed to activate account: ${res.status} ${errorText}`
-      );
+      throw new Error('Failed to activate account');
     }
 
     const json = await res.json();

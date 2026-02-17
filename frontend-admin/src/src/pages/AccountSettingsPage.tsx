@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AdminLayout } from '../components/layout/AdminLayout';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -19,6 +19,16 @@ export function AccountSettingsPage() {
     phoneNumber: user?.phoneNumber || '',
     address: user?.address || ''
   });
+
+  useEffect(() => {
+    if (!user) return;
+    setProfileData({
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      phoneNumber: user.phoneNumber || '',
+      address: user.address || ''
+    });
+  }, [user]);
   const [passwords, setPasswords] = useState({
     current: '',
     new: '',
@@ -100,10 +110,10 @@ export function AccountSettingsPage() {
     setIsProfileSaving(true);
     try {
       await updateProfile(pendingProfileUpdate);
-      toast.success('Profile updated successfully');
+      toast.success('Your profile has been updated!');
       setPendingProfileUpdate(null);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile');
+      toast.error('Couldn\'t update your profile. Please try again.');
     } finally {
       setIsProfileSaving(false);
     }
@@ -111,11 +121,11 @@ export function AccountSettingsPage() {
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwords.new !== passwords.confirm) {
-      toast.error('New passwords do not match');
+      toast.error('Your password confirmation doesn\'t match');
       return;
     }
     if (passwords.new.length < 8) {
-      toast.error('Password must be at least 8 characters');
+      toast.error('Your password must be at least 8 characters');
       return;
     }
     
@@ -128,14 +138,14 @@ export function AccountSettingsPage() {
     setIsPasswordSaving(true);
     try {
       await changePassword(passwords.current, passwords.new);
-      toast.success('Password changed successfully');
+      toast.success('Your password has been changed!');
       setPasswords({
         current: '',
         new: '',
         confirm: ''
       });
     } catch (error: any) {
-      toast.error(error.message || 'Failed to change password');
+      toast.error('Couldn\'t change your password. Please try again.');
     } finally {
       setIsPasswordSaving(false);
     }

@@ -12,9 +12,7 @@ export async function getAuditLogsInfo(auditId: string) {
 
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error(
-        `Failed to fetch audit log info: ${res.status} ${errorText}`
-      );
+      throw new Error('Failed to load audit details');
     }
 
     const json = await res.json();

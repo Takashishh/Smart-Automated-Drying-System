@@ -41,7 +41,7 @@ export async function createAdminAccount(
   const json = await res.json();
 
   if (!res.ok) {
-    throw new Error(json?.message || "Failed to create admin");
+    throw new Error('Failed to create admin');
   }
 
   return json?.data ?? json;

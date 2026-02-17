@@ -9,7 +9,7 @@ export async function getUserInfo(userId: string) {
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch user info: ${res.status} ${res.statusText}`);
+      throw new Error('Failed to load user information');
     }
 
     const json = await res.json();

@@ -36,7 +36,7 @@ export function ViewTicketsPage({ user }: ViewTicketsPageProps) {
       );
       setTickets(sortedTickets);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load tickets');
+      setError(err instanceof Error ? err.message : 'Couldn\'t load tickets. Please try again.');
     } finally {
       setIsLoading(false);
     }

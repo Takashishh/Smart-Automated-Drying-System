@@ -58,24 +58,24 @@ export function AdminsPage() {
     const gmailRegex = /^[a-z0-9]+@gmail\.com$/;
     if (!gmailRegex.test(newAdmin.email)) {
       setEmailError('Email must be a valid Gmail address (lowercase, e.g., user@gmail.com)');
-      toast.error('Email must be a valid Gmail address');
+      toast.error('Please use a valid Gmail address (e.g., user@gmail.com)');
       return;
     }
 
     if (newAdmin.password !== newAdmin.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error('Your password confirmation doesn\'t match');
       return;
     }
 
     if (newAdmin.password.length < 8) {
-      toast.error('Password must be at least 8 characters');
+      toast.error('Your password must be at least 8 characters long');
       return;
     }
 
     const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-={}\[\]|:;"'<>,.?/]).+$/;
 
     if (!strongPassword.test(newAdmin.password)) {
-      toast.error('Password needs upper, lower, number, and special character');
+      toast.error('Use uppercase, lowercase, numbers, and symbols (like !@#) in your password');
       return;
     }
 
@@ -91,9 +91,9 @@ export function AdminsPage() {
         confirmPassword: ''
       }));
       setStep(2); // Move to confirmation step
-      toast.success('Admin created successfully');
+      toast.success('Admin account created and ready to use!');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to create admin');
+      toast.error('Couldn\'t create the admin account. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
