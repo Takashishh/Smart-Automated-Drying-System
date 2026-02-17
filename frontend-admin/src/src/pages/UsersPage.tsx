@@ -96,9 +96,6 @@ export function UsersPage() {
                 <th className="hidden sm:table-cell px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Devices
                 </th>
-                <th className="hidden lg:table-cell px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Last Login
-                </th>
                 <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
@@ -107,13 +104,13 @@ export function UsersPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 sm:px-6 py-4 text-center text-gray-500">
+                  <td colSpan={4} className="px-4 sm:px-6 py-4 text-center text-gray-500">
                     Loading users...
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 sm:px-6 py-4 text-center text-gray-500">
+                  <td colSpan={4} className="px-4 sm:px-6 py-4 text-center text-gray-500">
                     No users found
                   </td>
                 </tr>
@@ -138,9 +135,6 @@ export function UsersPage() {
                       </td>
                       <td className="hidden sm:table-cell px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {user.devices?.length ?? 0} Devices
-                      </td>
-                      <td className="hidden lg:table-cell px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : '-'}
                       </td>
                       <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Link to={`/users/${user.uuid}`}>

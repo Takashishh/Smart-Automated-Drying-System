@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../components/layout/AdminLayout';
 import { Card } from '../components/ui/Card';
@@ -8,6 +8,7 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { useAdmins } from '../hooks/useAdmins';
 import { ArrowLeft, Shield, Ban, CheckCircle, Activity } from 'lucide-react';
 import { toast } from 'sonner';
+import { getAuditLogs } from '../../api/audit-logs/get-audit-logs';
 export function AdminDetailPage() {
   const {
     id
@@ -21,7 +22,35 @@ export function AdminDetailPage() {
   } = useAdmins();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [loadingLogs, setLoadingLogs] = useState(true);
+  
   const admin = admins.find(a => a.adminId === id);
+  
+  // Fetch audit logs for this admin
+  useEffect(() => {
+    const fetchAdminLogs = async () => {
+      if (!admin?.email) return;
+      
+      try {
+        setLoadingLogs(true);
+        const logs = await getAuditLogs();
+        // Filter logs by this admin's email (performedBy contains email in format "Name (email)")
+        const adminLogs = logs
+          .filter((log: any) => log.performedBy && log.performedBy.includes(admin.email))
+          .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, 10);
+        setAuditLogs(adminLogs);
+      } catch (error) {
+        console.error('Failed to fetch audit logs:', error);
+      } finally {
+        setLoadingLogs(false);
+      }
+    };
+    
+    fetchAdminLogs();
+  }, [admin?.email]);
+  
   if (!admin) {
     return <AdminLayout title="Admin Not Found">
         <div className="text-center py-12">
@@ -45,6 +74,35 @@ export function AdminDetailPage() {
       setIsProcessing(false);
     }
   };
+  
+  const getActionBadgeColor = (action: string) => {
+    if (!action) return 'neutral';
+    if (action.includes('Created') || action.includes('Enabled')) return 'success';
+    if (action.includes('Disabled') || action.includes('Deleted')) return 'danger';
+    if (action.includes('Updated') || action.includes('Assigned')) return 'warning';
+    return 'neutral';
+  };
+  
+  const formatTimestamp = (timestamp: string) => {
+    if (!timestamp) return 'N/A';
+    try {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diff = now.getTime() - date.getTime();
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      
+      if (minutes < 1) return 'Just now';
+      if (minutes < 60) return `${minutes}m ago`;
+      if (hours < 24) return `${hours}h ago`;
+      if (days < 7) return `${days}d ago`;
+      return date.toLocaleDateString();
+    } catch (error) {
+      return 'Invalid Date';
+    }
+  };
+  
   return <AdminLayout title="Admin Details">
       <div className="mb-6">
         <Button variant="ghost" onClick={() => navigate('/admins')} leftIcon={<ArrowLeft className="h-4 w-4" />}>
@@ -74,10 +132,6 @@ export function AdminDetailPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Admin ID</span>
-                <span className="font-mono text-gray-900">{admin.adminId}</span>
-              </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Joined</span>
                 <span className="text-gray-900">
@@ -110,10 +164,43 @@ export function AdminDetailPage() {
 
         <div className="lg:col-span-2 space-y-6">
           <Card title="Recent Activity">
-            <div className="text-center py-8 text-gray-500">
-              <Activity className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-              <p>No recent activity logs found for this admin.</p>
-            </div>
+            {loadingLogs ? (
+              <div className="text-center py-8 text-gray-500">
+                <Activity className="h-12 w-12 mx-auto text-gray-300 mb-3 animate-pulse" />
+                <p>Loading activity logs...</p>
+              </div>
+            ) : auditLogs.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Activity className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                <p>No recent activity logs found for this admin.</p>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                {auditLogs.map((log: any, index: number) => (
+                  <div 
+                    key={log.id || index} 
+                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
+                  >
+                    <div className="flex-shrink-0 mt-1">
+                      <Badge variant={getActionBadgeColor(log.action) as any}>
+                        {log.action || 'Unknown'}
+                      </Badge>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-900 font-medium">
+                        {log.action || 'Unknown action'}
+                      </p>
+                      <p className="text-sm text-gray-600 truncate">
+                        Target: {log.target || 'N/A'}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {formatTimestamp(log.timestamp)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
         </div>
       </div>

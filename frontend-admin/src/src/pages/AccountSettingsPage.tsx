@@ -16,6 +16,7 @@ export function AccountSettingsPage() {
   const [profileData, setProfileData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
+    middleName: user?.middleName || '',
     phoneNumber: user?.phoneNumber || '',
     address: user?.address || ''
   });
@@ -25,6 +26,7 @@ export function AccountSettingsPage() {
     setProfileData({
       firstName: user.firstName || '',
       lastName: user.lastName || '',
+      middleName: user.middleName || '',
       phoneNumber: user.phoneNumber || '',
       address: user.address || ''
     });
@@ -79,7 +81,7 @@ export function AccountSettingsPage() {
     return str.replace(/[^a-zA-Z\s]/g, '');
   };
 
-  const handleNameChange = (field: 'firstName' | 'lastName', value: string) => {
+  const handleNameChange = (field: 'firstName' | 'lastName' | 'middleName', value: string) => {
     const sanitized = sanitizeName(value);
     const capitalized = capitalizeWords(sanitized);
     setProfileData({
@@ -95,6 +97,7 @@ export function AccountSettingsPage() {
     const updatePayload: any = {};
     if (profileData.firstName.trim()) updatePayload.firstName = profileData.firstName;
     if (profileData.lastName.trim()) updatePayload.lastName = profileData.lastName;
+    if (profileData.middleName.trim()) updatePayload.middleName = profileData.middleName;
     if (profileData.phoneNumber.trim()) updatePayload.phoneNumber = profileData.phoneNumber;
     if (profileData.address.trim()) updatePayload.address = profileData.address;
     
@@ -178,6 +181,12 @@ export function AccountSettingsPage() {
                 onChange={e => handleNameChange('lastName', e.target.value)} 
               />
             </div>
+            <Input 
+              label="Middle Name (Optional)" 
+              value={profileData.middleName} 
+              onChange={e => handleNameChange('middleName', e.target.value)} 
+              placeholder="Enter middle name"
+            />
             <Input label="Email" value={user?.email} disabled className="bg-gray-50" />
             <p className="text-xs text-gray-500 -mt-2">
               Email cannot be changed for security reasons

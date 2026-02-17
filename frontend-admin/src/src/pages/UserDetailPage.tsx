@@ -140,10 +140,6 @@ export function UserDetailPage() {
 
             <div className="space-y-4">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">User ID</span>
-                <span className="font-mono text-gray-900 text-xs break-all">{user.uuid}</span>
-              </div>
-              <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Joined</span>
                 <span className="text-gray-900">
                   {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
