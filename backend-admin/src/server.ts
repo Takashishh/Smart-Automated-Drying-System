@@ -27,13 +27,13 @@ if (!process.env.HTTP_PORT || !process.env.HOST) {
 
 server.register(firebasePlug);
 await server.register(emailPlugin, {
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: process.env.SMTP_SECURE === 'true',
-  user: process.env.SMTP_USER,      
-  pass: process.env.SMTP_PASSWORD,            
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  user: "jefsohandsome1@gmail.com",      
+  pass: "atdxricoakiwnbcw",              
 });
-server.register(ticketsRouter, {prefix: "/tickets"})
+server.register(ticketsRouter, {prefix:  "/tickets"})
 server.register(userModRoutes, {prefix: "/users"});
 server.register(userAuthRoutes, {prefix: "/api/auth"});
 server.register(deviceModRouter, {prefix: "/devices"});

@@ -123,26 +123,60 @@ export function TicketsPage() {
 
   const handleStatusUpdate = async () => {
     if (!statusChangeAction) return;
+    // capture and close dialog for snappy UI
+    const action = statusChangeAction;
+    setStatusChangeAction(null);
     setIsProcessing(true);
     try {
-      await updateStatus(statusChangeAction.ticketId, statusChangeAction.status);
-      toast.success(`Ticket marked as ${statusLabel(statusChangeAction.status)}`);
-      setStatusChangeAction(null);
-    } catch (error) {
-      toast.error('Failed to update ticket status');
+      await updateStatus(action.ticketId, action.status);
+      toast.success(`Ticket marked as ${statusLabel(action.status)}`);
+    } catch (err: unknown) {
+      // try to show helpful server message when available
+      let msg = 'Failed to update ticket status';
+      if (err instanceof Error && err.message) {
+        try {
+          // sometimes message contains JSON payload after status e.g. "Failed to update ticket: 404 {\"message\":\"Ticket not found\"}"
+          const jsonPart = err.message.match(/\{.*\}$/)?.[0];
+          if (jsonPart) {
+            const parsed = JSON.parse(jsonPart);
+            msg = parsed.message ? `${msg}: ${parsed.message}` : `${msg}: ${err.message}`;
+          } else {
+            msg = `${msg}: ${err.message}`;
+          }
+        } catch (_) {
+          msg = `${msg}: ${err.message}`;
+        }
+      }
+      toast.error(msg);
     } finally {
       setIsProcessing(false);
     }
   };
   const handleDelete = async () => {
     if (!ticketToDelete) return;
+    const id = ticketToDelete;
+    // close dialog immediately so UI doesn't await the network
+    setTicketToDelete(null);
     setIsProcessing(true);
     try {
-      await deleteTicket(ticketToDelete);
+      await deleteTicket(id);
       toast.success('Ticket deleted successfully');
-      setTicketToDelete(null);
-    } catch (error) {
-      toast.error('Failed to delete ticket');
+    } catch (err: unknown) {
+      let msg = 'Failed to delete ticket';
+      if (err instanceof Error && err.message) {
+        try {
+          const jsonPart = err.message.match(/\{.*\}$/)?.[0];
+          if (jsonPart) {
+            const parsed = JSON.parse(jsonPart);
+            msg = parsed.message ? `${msg}: ${parsed.message}` : `${msg}: ${err.message}`;
+          } else {
+            msg = `${msg}: ${err.message}`;
+          }
+        } catch (_) {
+          msg = `${msg}: ${err.message}`;
+        }
+      }
+      toast.error(msg);
     } finally {
       setIsProcessing(false);
     }
@@ -193,21 +227,6 @@ export function TicketsPage() {
     </button>
   );
   return <AdminLayout title="Support Tickets">
-      {/* Super-admin note */}
-      {isSuperAdmin && (
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-4 sm:mb-6 rounded-lg border border-red-200 bg-red-50 p-3 sm:p-4"
-        >
-          <div className="flex items-start gap-2 sm:gap-3">
-            <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 mt-0.5" />
-            <p className="text-xs sm:text-sm text-red-800">
-              You can delete tickets regardless of status. Regular admins can only update statuses.
-            </p>
-          </div>
-        </motion.div>
-      )}
 
       {/* Filters + Status pills */}
       <Card className="mb-4 sm:mb-6">
@@ -396,18 +415,15 @@ export function TicketsPage() {
                         Resolve
                       </Button>
                     )}
-                    {isSuperAdmin && (
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={() => setTicketToDelete(ticket.ticketId)}
-                        className="flex-1 sm:flex-none justify-center"
-                        leftIcon={<Trash2 className="h-4 w-4" />}
-                        title="Super-Admin only: Delete ticket"
-                      >
-                        Delete
-                      </Button>
-                    )}
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={() => setTicketToDelete(ticket.ticketId)}
+                      className="flex-1 sm:flex-none justify-center"
+                      leftIcon={<Trash2 className="h-4 w-4" />}
+                    >
+                      Delete
+                    </Button>
                     {ticket.resolvedDate && ticket.resolvedDate !== ticket.createdDate && (
                       <span className="ml-auto text-[11px] sm:text-xs text-gray-500 inline-flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" />
@@ -442,7 +458,7 @@ export function TicketsPage() {
         isOpen={!!ticketToDelete} 
         onClose={() => setTicketToDelete(null)} 
         onConfirm={handleDelete} 
-        title="Delete Ticket (Super-Admin)" 
+        title="Delete Ticket" 
         message={`This will permanently delete ticket ${ticketToDelete ? '#'+ticketToDelete.slice(0,12) : ''}. This cannot be undone and will be logged in the audit trail.`} 
         confirmText="Delete Ticket" 
         variant="danger" 

@@ -65,22 +65,29 @@ export function useAdmins() {
     setAdmins(prev => [...prev, newAdmin]);
     return newAdmin;
   };
+
   const toggleAdminStatus = async (adminId: string) => {
-    // This would call an API endpoint to toggle admin status
-    // For now, update local state optimistically
-    setAdmins(prev => prev.map(a => {
-      if (a.adminId === adminId) {
-        return {
-          ...a,
-          status: a.status === 'active' ? 'disabled' : 'active'
-        };
-      }
-      return a;
-    }));
-    
-    // TODO: Implement actual API call when backend endpoint is ready
-    // Example:
-    // await updateAdminStatus(adminId, newStatus);
+    const admin = admins.find(a => a.adminId === adminId);
+    if (!admin) throw new Error('Admin not found');
+
+    const newStatus = admin.status === 'active' ? 'disabled' : 'active';
+
+    try {
+      // Call backend to update status (will also update Firebase Auth)
+      const { toggleAdminStatusApi } = await import('../../api/admins/toggle-admin-status');
+      await toggleAdminStatusApi(admin.uid || admin.adminId, newStatus as 'active' | 'disabled');
+
+      // update local state after successful backend update
+      setAdmins(prev => prev.map(a => {
+        if (a.adminId === adminId) {
+          return { ...a, status: newStatus };
+        }
+        return a;
+      }));
+    } catch (err) {
+      console.error('Failed to toggle admin status:', err);
+      throw err;
+    }
   };
   
   return {

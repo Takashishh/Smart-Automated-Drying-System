@@ -10,6 +10,7 @@ export async function deleteTicketController(
         ticketId
     } = req.body
     try{
+        req.server.log.info({ ticketId, user: req.user?.uid }, 'deleteTicketController: incoming request');
         if(!req.user?.uid){
             return reply.code(401).send({
                 message: "Unauthorized"
@@ -20,11 +21,13 @@ export async function deleteTicketController(
             adminId,
             ticketId
         })
+        req.server.log.info({ res, ticketId, adminId }, 'deleteTicketController: deleteTickets succeeded');
         return reply.code(200).send({
             message: "Successfully deleted ticket",
             data: res
         })
     }catch(err: unknown){
+        req.server.log.error({ err, body: req.body, user: req.user?.uid }, 'deleteTicketController: error');
         if(err instanceof ServiceError){
             return reply.code(err.statusCode).send({
                 message: err.message

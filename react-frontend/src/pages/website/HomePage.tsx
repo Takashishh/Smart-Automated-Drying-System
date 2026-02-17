@@ -30,14 +30,14 @@ export function HomePage({
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                 </span>
-                Smart Laundry System V2.0
+                Smart Rack System V2.0
               </div>
               <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
-                Smart Drying. <br />
+                Smart Rack. <br />
                 <span className="text-blue-600">Rain-Safe.</span>
               </h1>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-lg">
-                The intelligent automated laundry system that protects your
+                The intelligent automated Rack system that protects your
                 clothes from rain and dries them efficiently using smart
                 sensors.
               </p>

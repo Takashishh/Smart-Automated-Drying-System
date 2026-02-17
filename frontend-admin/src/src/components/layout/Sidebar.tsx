@@ -66,12 +66,12 @@ export function Sidebar({
         </div>
         <div className="min-w-0">
           <h1 className="text-base font-bold leading-tight truncate text-gray-900">
-            WeatherSmart Rack
+            Smart Rack
           </h1>
           <p className="text-xs text-gray-500 truncate">Admin Portal</p>
         </div>
       </div>
-
+z
       {/* User Profile Card */}
       <div className="mx-4 mt-4 p-3 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border border-blue-100">
         <div className="flex items-center space-x-3">

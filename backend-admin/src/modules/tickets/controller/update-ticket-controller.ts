@@ -11,6 +11,7 @@ export async function updateTicketController(
         ticketId
     } = req.body;
     try{
+        req.server.log.info({ ticketId, status, user: req.user?.uid }, 'updateTicketController: incoming request');
         if(!req.user?.uid){
             return reply.code(401).send({
                 message: "Unauthorized"
@@ -22,11 +23,13 @@ export async function updateTicketController(
             status,
             ticketId
         })
+        req.server.log.info({ res, ticketId, status, adminId }, 'updateTicketController: updateTicketStatus succeeded');
         return reply.code(200).send({
             message: "Successfully updated tickets",
             data: res
         })
     }catch(err: unknown){
+        req.server.log.error({ err, body: req.body, user: req.user?.uid }, 'updateTicketController: error');
         if(err instanceof ServiceError){
             return reply.code(err.statusCode).send({
                 message: err.message

@@ -6,6 +6,7 @@ import { createAdminAccountController } from "../controller/create-admin-control
 import { verifyEmailAdminController } from "../controller/verifyAdminController.js";
 import { getAdminsController } from "../controller/get-admins-controller.js";
 import { updateAdminProfileController } from "../controller/update-admin-profile-controller.js";
+import { updateAdminStatusController } from "../controller/update-admin-status-controller.js";
 import { changePasswordController } from "../controller/change-password-controller.js";
 
 export function adminRoutes(fastify: FastifyInstance) {
@@ -72,6 +73,14 @@ export function adminRoutes(fastify: FastifyInstance) {
     },
     preHandler: firebaseAuthPreHandler,
     handler: updateAdminProfileController,
+  });
+
+  // Toggle admin status (enable/disable)
+  fastify.route({
+    url: "/toggle-status",
+    method: "POST",
+    preHandler: firebaseAuthPreHandler,
+    handler: updateAdminStatusController,
   });
 
   // Change password route

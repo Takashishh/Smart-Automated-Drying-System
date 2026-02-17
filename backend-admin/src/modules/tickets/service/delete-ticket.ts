@@ -19,11 +19,16 @@ export async function deleteTickets(
 
     await ticketRef.delete();
 
-    await createAuditFunction(fastify, {
-      adminId: body.adminId,
-      action: "Ticket Deleted",
-      target: body.ticketId
-    });
+    // Attempt to create an audit log but don't fail the whole operation if audit logging errors
+    try {
+      await createAuditFunction(fastify, {
+        adminId: body.adminId,
+        action: "Ticket Deleted",
+        target: body.ticketId
+      });
+    } catch (auditErr) {
+      fastify.log.warn({ err: auditErr }, 'Failed to create audit log for ticket delete');
+    }
 
     return {
       ticketId: body.ticketId,

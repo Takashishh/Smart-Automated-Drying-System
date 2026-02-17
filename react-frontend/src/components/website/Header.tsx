@@ -69,10 +69,10 @@ export function Header({
           {/* Logo */}
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => onNavigate('home')}>
             <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md">
-              <img src="/Iconi.png" alt="Smart Laundry Logo" className="w-full h-full object-cover" />
+              <img src="/iconi.png" alt="Smart Rack Logo" className="w-full h-full object-cover" />
             </div>
             <span className="text-xl font-bold text-gray-900 tracking-tight">
-              Smart Laundry
+              Smart Rack
             </span>
           </div>
 

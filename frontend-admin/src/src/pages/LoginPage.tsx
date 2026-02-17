@@ -99,24 +99,30 @@ export function LoginPage() {
       
       navigate('/dashboard');
     } catch (err: any) {
-      const newAttempts = failedAttempts + 1;
-      setFailedAttempts(newAttempts);
-      localStorage.setItem('login_attempts', JSON.stringify(newAttempts));
-
-      if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
-        // Lock account for 5 minutes
-        const cooldownEndTime = Date.now() + COOLDOWN_DURATION * 1000;
-        localStorage.setItem('login_cooldown_end', cooldownEndTime.toString());
-        setIsLocked(true);
-        setCooldownTime(COOLDOWN_DURATION);
-        setError(`Too many failed login attempts. Account locked for 5 minutes.`);
+      // If account is disabled, show a clear message and don't count it as a failed attempt
+      const msg = err?.message || 'Failed to login';
+      if (typeof msg === 'string' && msg.toLowerCase().includes('disabled')) {
+        setError('Your account has been disabled. Please contact a Super-Admin to re-activate your account.');
       } else {
-        const remainingAttempts = MAX_LOGIN_ATTEMPTS - newAttempts;
-        setError(
-          `${err.message || 'Failed to login'}. ${remainingAttempts} attempt${
-            remainingAttempts !== 1 ? 's' : ''
-          } remaining.`
-        );
+        const newAttempts = failedAttempts + 1;
+        setFailedAttempts(newAttempts);
+        localStorage.setItem('login_attempts', JSON.stringify(newAttempts));
+
+        if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
+          // Lock account for 5 minutes
+          const cooldownEndTime = Date.now() + COOLDOWN_DURATION * 1000;
+          localStorage.setItem('login_cooldown_end', cooldownEndTime.toString());
+          setIsLocked(true);
+          setCooldownTime(COOLDOWN_DURATION);
+          setError(`Too many failed login attempts. Account locked for 5 minutes.`);
+        } else {
+          const remainingAttempts = MAX_LOGIN_ATTEMPTS - newAttempts;
+          setError(
+            `${msg}. ${remainingAttempts} attempt${
+              remainingAttempts !== 1 ? 's' : ''
+            } remaining.`
+          );
+        }
       }
     } finally {
       setIsLoading(false);

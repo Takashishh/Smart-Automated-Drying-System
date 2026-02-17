@@ -39,11 +39,16 @@ export async function updateTicketStatus(
       updatedAt: new Date()
     });
 
-    await createAuditFunction(fastify, {
-      adminId: body.adminId,
-      action: "Ticket Status Updated",
-      target: body.ticketId
-    });
+    // Attempt to create an audit log but don't fail the whole operation if audit logging errors
+    try {
+      await createAuditFunction(fastify, {
+        adminId: body.adminId,
+        action: "Ticket Status Updated",
+        target: body.ticketId
+      });
+    } catch (auditErr) {
+      fastify.log.warn({ err: auditErr }, 'Failed to create audit log for ticket status update');
+    }
 
     return {
       ticketId: body.ticketId,

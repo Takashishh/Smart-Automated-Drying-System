@@ -41,7 +41,14 @@ export async function createAuditFunction(
     const adminData = adminDoc.data()!;
 
     // 2️⃣ Normalize reason
-    const normalizedReason = body.reason ?? "";
+    let normalizedReason = "";
+
+    if(!body.reason){
+      normalizedReason = "";
+    }else{
+      normalizedReason = body.reason;
+    }
+
     fastify.log.info(`normalized reason value: ${normalizedReason}`)
 
     // 3️⃣ Replace targetId with readable name if possible
@@ -63,7 +70,8 @@ export async function createAuditFunction(
       performedBy: `${adminData.firstName} ${adminData.lastName} (${adminData.email})`,
       action: body.action,
       target: targetReadable,
-      reason: body.reason,
+      // use normalized reason to avoid writing `undefined` into Firestore
+      reason: normalizedReason,
       timestamp: new Date().toISOString(),
     });
 

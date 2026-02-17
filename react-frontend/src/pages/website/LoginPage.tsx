@@ -84,6 +84,8 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
         body: JSON.stringify({ email, password })
       });
       
+
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.message || 'Invalid credentials');
@@ -94,6 +96,7 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
       if (data.user) {
         localStorage.setItem('auth_user', JSON.stringify(data.user));
       }
+
       setFailedAttempts(0);
       localStorage.removeItem('login_attempts');
       localStorage.removeItem('login_cooldown_end');

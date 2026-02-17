@@ -89,7 +89,7 @@ export function TicketsPage({ user, onNavigate }: TicketsPageProps) {
                   Describe the issue and our team will jump on it.
                 </h1>
                 <p className="text-white/80 text-lg leading-relaxed">
-                  Tell us what is happening with your Smart Laundry setup. Choose the area that best
+                  Tell us what is happening with your Smart Rack setup. Choose the area that best
                   fits (sensor, software, or hardware) and add a short description. We will route it to the
                   right specialist.
                 </p>

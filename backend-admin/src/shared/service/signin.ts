@@ -26,6 +26,12 @@ export async function signin(
         throw new ServiceError(403, "Invalid admin role")
     }
 
+    // Prevent disabled admins from signing in
+    // adminData.status is set to 'active' when created and 'disabled' when disabled
+    if (adminData.status && String(adminData.status).toLowerCase() === 'disabled') {
+      throw new ServiceError(403, 'Account disabled');
+    }
+
     return {
       uid,
       firstName: adminData.firstName ?? "",

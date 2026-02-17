@@ -25,10 +25,7 @@ export async function userLoginService(
     const userDoc = usersSnapshot.docs[0];
     const userData = userDoc!.data() ?? {};
 
-    // Check if user account is activated
-    if (userData.status !== "activated") {
-      throw new ServiceError(403, "Account is not activated");
-    }
+    // Check if user account is activat
 
     const apiKey = process.env.FIREBASE_API_KEY || process.env.FIREBASE_WEB_API_KEY;
     if (!apiKey) {
