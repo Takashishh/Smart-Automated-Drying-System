@@ -15,10 +15,15 @@ export function ViewTicketsPage({ user }: ViewTicketsPageProps) {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [filter, setFilter] = useState<'all' | 'Open' | 'In-Progress' | 'Resolved'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchTickets = async () => {
+  const PAGE_SIZE = 10;
+
+  const fetchTickets = async (page: number = currentPage) => {
     if (!user?.uid) {
       setError('Please sign in to view your tickets');
       setIsLoading(false);
@@ -29,12 +34,16 @@ export function ViewTicketsPage({ user }: ViewTicketsPageProps) {
     setError('');
 
     try {
-      const userTickets = await getUserTickets(user.uid);
+      const result = await getUserTickets(user.uid, page, PAGE_SIZE);
+      const userTickets = result.data;
       // Sort by creation date (newest first)
       const sortedTickets = userTickets.sort((a, b) => 
         new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
       );
       setTickets(sortedTickets);
+      setCurrentPage(result.pagination.currentPage || page);
+      setTotalPages(result.pagination.totalPages || 1);
+      setTotalItems(result.pagination.totalItems || 0);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Couldn\'t load tickets. Please try again.');
     } finally {
@@ -43,8 +52,8 @@ export function ViewTicketsPage({ user }: ViewTicketsPageProps) {
   };
 
   useEffect(() => {
-    fetchTickets();
-  }, [user?.uid]);
+    fetchTickets(currentPage);
+  }, [user?.uid, currentPage]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -220,7 +229,7 @@ export function ViewTicketsPage({ user }: ViewTicketsPageProps) {
 
             {/* Refresh Button */}
             <button
-              onClick={fetchTickets}
+              onClick={() => fetchTickets(currentPage)}
               disabled={isLoading}
               className="px-5 py-3 rounded-xl bg-white border-2 border-blue-200 text-blue-700 hover:border-blue-500 hover:text-blue-600 transition-all flex items-center gap-2 disabled:opacity-50 font-medium group"
             >
@@ -393,6 +402,28 @@ export function ViewTicketsPage({ user }: ViewTicketsPageProps) {
                 );
               })}
             </AnimatePresence>
+
+            <div className="mt-4 flex items-center justify-between bg-white rounded-xl border border-blue-100 p-4">
+              <p className="text-sm text-gray-600">
+                Page {currentPage} of {Math.max(totalPages, 1)} · {totalItems} total tickets
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage <= 1 || isLoading}
+                  className="px-4 py-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-50 disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages || 1))}
+                  disabled={isLoading || currentPage >= (totalPages || 1)}
+                  className="px-4 py-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-50 disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

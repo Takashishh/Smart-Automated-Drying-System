@@ -1,9 +1,7 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCkPtysjodxh356vyuQSaAhg59xjeHjMVU",
   authDomain: "smart-drying-iot.firebaseapp.com",
@@ -15,14 +13,10 @@ const firebaseConfig = {
   measurementId: "G-PNJNCYJWC2"
 };
 
-// Initialize Firebase App
 const app = initializeApp(firebaseConfig);
 
-// ✅ Export the Auth instance (required for sign-in, sessions, tokens)
 export const auth = getAuth(app);
 
-// Optional: Analytics (safe guard for browser-only)
 export const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
 
-// Export app only if needed elsewhere
 export default app;

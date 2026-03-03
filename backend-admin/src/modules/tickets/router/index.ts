@@ -7,14 +7,14 @@ import { CreateTicketBody, DeleteTicketBody, UpdateTicketStatusBody } from "../s
 import { createTicketController } from "../controller/create-ticket-controller.js";
 import { updateTicketController } from "../controller/update-ticket-controller.js";
 import { deleteTicketController } from "../controller/delete-ticket-controller.js";
-import { paginationQuerySchema } from "../../../shared/schema.js";
+import { GetTicketsQuery } from "../schema/ticket-schemas.js";
 
 export function ticketsRouter(fastify: FastifyInstance){
     fastify.route({
         url: '/get-tickets',
         method: 'GET',
         schema: {
-            querystring: paginationQuerySchema,
+            querystring: GetTicketsQuery,
         },
         handler: getTicketsController
     })

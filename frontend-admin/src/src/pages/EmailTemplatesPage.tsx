@@ -17,6 +17,10 @@ export function EmailTemplatesPage() {
     logs,
     recipients,
     loading,
+    logsPage,
+    logsTotalPages,
+    logsTotalItems,
+    setLogsPage,
     sendEmail
   } = useEmails();
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
@@ -108,8 +112,8 @@ export function EmailTemplatesPage() {
       if (selectedRecipient.type === 'user') {
         setLoadingTickets(true);
         try {
-          const allTickets = await getTickets();
-          const recipientTickets = allTickets.filter((t: any) => 
+          const allTickets = await getTickets(1, 100);
+          const recipientTickets = allTickets.data.filter((t: any) => 
             t.email === email || t.userEmail === email
           );
           setUserTickets(recipientTickets);
@@ -288,6 +292,29 @@ export function EmailTemplatesPage() {
                   </div>
                 ))
               )}
+            </div>
+            <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+              <p className="text-xs text-gray-500">
+                Page {logsPage} of {Math.max(logsTotalPages, 1)} · {logsTotalItems} total logs
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLogsPage((prev: number) => Math.max(prev - 1, 1))}
+                  disabled={logsPage <= 1 || loading}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLogsPage((prev: number) => Math.min(prev + 1, logsTotalPages || 1))}
+                  disabled={loading || logsPage >= (logsTotalPages || 1)}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           </Card>
         </div>

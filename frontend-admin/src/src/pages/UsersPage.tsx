@@ -15,15 +15,22 @@ export function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+
+  const PAGE_SIZE = 10;
 
   // Fetch users on mount and poll every 30 seconds
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const fetchedUsers = await getUsers();
-        console.log('Fetched users:', JSON.stringify(fetchedUsers, null, 2));
-        setUsers(fetchedUsers);
+        const result = await getUsers(currentPage, PAGE_SIZE);
+        setUsers(result.data);
+        setCurrentPage(result.pagination.currentPage || currentPage);
+        setTotalPages(result.pagination.totalPages || 1);
+        setTotalItems(result.pagination.totalItems || 0);
       } catch (err) {
         console.error('Error fetching users:', err);
       } finally {
@@ -39,7 +46,7 @@ export function UsersPage() {
 
     // Cleanup interval on unmount
     return () => clearInterval(pollInterval);
-  }, []);
+  }, [currentPage]);
 
   // Filtered & searchable list
   const filteredUsers = users.filter(user => {
@@ -152,6 +159,28 @@ export function UsersPage() {
           </table>
         </div>
       </Card>
+
+      <div className="mt-4 flex items-center justify-between">
+        <p className="text-sm text-gray-600">
+          Page {currentPage} of {Math.max(totalPages, 1)} · {totalItems} total users
+        </p>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage <= 1 || loading}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages || 1))}
+            disabled={loading || currentPage >= (totalPages || 1)}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </AdminLayout>
   );
 }

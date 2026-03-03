@@ -4,21 +4,29 @@ import { getTickets } from '../../api/tickets/get-tickets';
 import { updateTicketStatus } from '../../api/tickets/update-ticket-status';
 import { deleteTickets } from '../../api/tickets/delete-tickets';
 
+const PAGE_SIZE = 10;
+
 export function useTickets() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const fetchTickets = async () => {
+  const fetchTickets = async (page: number) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getTickets();
+      const result = await getTickets(page, PAGE_SIZE);
+      const data = result.data;
         
         // Ensure data is an array
         if (!Array.isArray(data)) {
           console.error('Invalid tickets data format:', data);
           setTickets([]);
+          setTotalPages(1);
+          setTotalItems(0);
           return;
         }
 
@@ -59,6 +67,9 @@ export function useTickets() {
           .filter((ticket: Ticket | null): ticket is Ticket => ticket !== null);
 
         setTickets(mappedTickets);
+        setCurrentPage(result.pagination.currentPage || page);
+        setTotalPages(result.pagination.totalPages || 1);
+        setTotalItems(result.pagination.totalItems || 0);
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to fetch tickets';
         console.error('Failed to fetch tickets:', err);
@@ -70,16 +81,16 @@ export function useTickets() {
     };
 
   useEffect(() => {
-    fetchTickets();
+    fetchTickets(currentPage);
 
     // Poll for new tickets every 30 seconds
     const pollInterval = setInterval(() => {
-      fetchTickets();
+      fetchTickets(currentPage);
     }, 30000);
 
     // Cleanup interval on unmount
     return () => clearInterval(pollInterval);
-  }, []);
+  }, [currentPage]);
 
   const updateStatus = async (ticketId: string, status: TicketStatus) => {
     try {
@@ -123,6 +134,10 @@ export function useTickets() {
     tickets,
     loading,
     error,
+    currentPage,
+    totalPages,
+    totalItems,
+    setCurrentPage,
     updateStatus,
     deleteTicket
   };

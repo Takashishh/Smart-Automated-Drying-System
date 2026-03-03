@@ -25,3 +25,11 @@ export const DeleteTicketBody = Type.Object({
 
 export type DeleteTicketBodyType = Static<typeof DeleteTicketBody>;
 
+export const GetTicketsQuery = Type.Object({
+  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, default: 10 })),
+  userId: Type.Optional(Type.String({ minLength: 1 })),
+});
+
+export type GetTicketsQueryType = Static<typeof GetTicketsQuery>;
+

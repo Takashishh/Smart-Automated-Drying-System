@@ -34,7 +34,8 @@ export function AdminDetailPage() {
       
       try {
         setLoadingLogs(true);
-        const logs = await getAuditLogs();
+        const logsResult = await getAuditLogs(1, 100);
+        const logs = logsResult.data;
         // Filter logs by this admin's email (performedBy contains email in format "Name (email)")
         const adminLogs = logs
           .filter((log: any) => log.performedBy && log.performedBy.includes(admin.email))

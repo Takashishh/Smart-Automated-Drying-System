@@ -17,6 +17,10 @@ export function TicketsPage() {
     tickets,
     loading,
     error,
+    currentPage,
+    totalPages,
+    totalItems,
+    setCurrentPage,
     updateStatus,
     deleteTicket
   } = useTickets();
@@ -271,6 +275,28 @@ export function TicketsPage() {
       {/* Result Counter */}
       <div className="mb-4 sm:mb-6 text-xs sm:text-sm text-gray-600">
         Showing <span className="font-semibold text-gray-900">{filteredAndSortedTickets.length}</span> of <span className="font-semibold text-gray-900">{tickets.length}</span> tickets
+      </div>
+
+      <div className="mb-4 sm:mb-6 flex items-center justify-between">
+        <p className="text-xs sm:text-sm text-gray-600">
+          Page {currentPage} of {Math.max(totalPages, 1)} · {totalItems} total tickets
+        </p>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((prev: number) => Math.max(prev - 1, 1))}
+            disabled={currentPage <= 1 || loading}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((prev: number) => Math.min(prev + 1, totalPages || 1))}
+            disabled={loading || currentPage >= (totalPages || 1)}
+          >
+            Next
+          </Button>
+        </div>
       </div>
 
       {error && (

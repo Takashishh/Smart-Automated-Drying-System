@@ -22,6 +22,9 @@ import { registerDevice } from '../../api/devices/register-device';
 export function DevicesPage() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
@@ -41,6 +44,8 @@ export function DevicesPage() {
   const [deleteReason, setDeleteReason] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const PAGE_SIZE = 10;
+
   useEffect(() => {
     fetchDevices();
 
@@ -51,15 +56,35 @@ export function DevicesPage() {
 
     // Cleanup interval on unmount
     return () => clearInterval(pollInterval);
-  }, []);
+  }, [currentPage]);
+
+  const fetchAllUsers = async () => {
+    const users: any[] = [];
+    let page = 1;
+    let pages = 1;
+
+    do {
+      const result = await getUsers(page, 100);
+      users.push(...result.data);
+      pages = result.pagination.totalPages || 1;
+      page += 1;
+    } while (page <= pages);
+
+    return users;
+  };
 
   const fetchDevices = async () => {
     setLoading(true);
     try {
-      const [devicesData, usersData] = await Promise.all([
-        getDevices(),
-        getUsers()
+      const [devicesResult, usersData] = await Promise.all([
+        getDevices(currentPage, PAGE_SIZE),
+        fetchAllUsers()
       ]);
+
+      const devicesData = devicesResult.data;
+      setCurrentPage(devicesResult.pagination.currentPage || currentPage);
+      setTotalPages(devicesResult.pagination.totalPages || 1);
+      setTotalItems(devicesResult.pagination.totalItems || 0);
 
       const userMap = new Map(
         usersData.map((user: any) => {
@@ -345,6 +370,28 @@ export function DevicesPage() {
           </table>
         </div>
       </Card>
+
+      <div className="mt-4 flex items-center justify-between">
+        <p className="text-sm text-gray-600">
+          Page {currentPage} of {Math.max(totalPages, 1)} · {totalItems} total devices
+        </p>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage <= 1 || loading}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages || 1))}
+            disabled={loading || currentPage >= (totalPages || 1)}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
 
       <CreateDeviceModal
         isOpen={isCreateModalOpen}

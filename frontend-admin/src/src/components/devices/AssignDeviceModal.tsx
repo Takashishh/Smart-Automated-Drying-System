@@ -49,7 +49,18 @@ export function AssignDeviceModal({
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const data = await getUsers();
+      const users: User[] = [];
+      let page = 1;
+      let totalPages = 1;
+
+      do {
+        const result = await getUsers(page, 100);
+        users.push(...result.data);
+        totalPages = result.pagination.totalPages || 1;
+        page += 1;
+      } while (page <= totalPages);
+
+      const data = users;
       setUsers(data);
     } catch (error) {
       toast.error('Couldn\'t load users. Please try again.');

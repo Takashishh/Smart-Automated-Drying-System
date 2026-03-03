@@ -28,6 +28,10 @@ export function AdminsPage() {
   const {
     admins,
     loading,
+    currentPage,
+    totalPages,
+    totalItems,
+    setCurrentPage,
     createAdmin
   } = useAdmins();
   const [searchTerm, setSearchTerm] = useState('');
@@ -215,6 +219,28 @@ export function AdminsPage() {
           </table>
         </div>
       </Card>
+
+      <div className="mt-4 flex items-center justify-between">
+        <p className="text-sm text-gray-600">
+          Page {currentPage} of {Math.max(totalPages, 1)} · {totalItems} total admins
+        </p>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((prev: number) => Math.max(prev - 1, 1))}
+            disabled={currentPage <= 1 || loading}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((prev: number) => Math.min(prev + 1, totalPages || 1))}
+            disabled={loading || currentPage >= (totalPages || 1)}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
 
       <Modal isOpen={isCreateModalOpen} onClose={handleCloseModal} title={step === 1 ? 'Add Admin' : 'Admin Added'} maxWidth="lg">
         {step === 1 ? <form onSubmit={handleCreate} className="space-y-4">

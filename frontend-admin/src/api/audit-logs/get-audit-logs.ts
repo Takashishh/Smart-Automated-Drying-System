@@ -1,8 +1,13 @@
 import { getAuthHeaders } from "../shared/get-auth-headers";
+import type { PaginatedResult } from "../users/get-users";
 
-export async function getAuditLogs() {
+export async function getAuditLogs(page: number = 1, limit: number = 10): Promise<PaginatedResult<any>> {
   try {
-    const res = await fetch("http://localhost:3000/audit-logs/get-audit-logs", {
+    const url = new URL("http://localhost:3000/audit-logs/get-audit-logs");
+    url.searchParams.set("page", String(page));
+    url.searchParams.set("limit", String(limit));
+
+    const res = await fetch(url.toString(), {
       method: "GET",
       headers: getAuthHeaders() 
     });
@@ -13,8 +18,16 @@ export async function getAuditLogs() {
     }
 
     const json = await res.json();
-    console.log(json.data);
-    return json.data ?? []; // ensure we always return an array
+
+    return {
+      data: Array.isArray(json?.data) ? json.data : [],
+      pagination: json?.pagination ?? {
+        currentPage: page,
+        pageSize: limit,
+        totalItems: 0,
+        totalPages: 0,
+      },
+    };
   } catch (err: unknown) {
     console.error("An error occurred in fetching the audit logs:", err);
     throw err;

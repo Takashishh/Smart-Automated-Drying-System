@@ -6,11 +6,18 @@ import type { PaginationMetadata } from '../../../shared/schema.js'
 export async function getTickets(
     fastify: FastifyInstance,
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
+    userId?: string
 ) {
     try {
+        let query = fastify.db.collection('tickets');
+
+        if (userId) {
+            query = query.where('userId', '==', userId);
+        }
+
         // Get total count
-        const totalSnapshot = await fastify.db.collection('tickets').count().get();
+        const totalSnapshot = await query.count().get();
         const totalItems = totalSnapshot.data().count;
 
         if (totalItems === 0) {
@@ -29,8 +36,7 @@ export async function getTickets(
         const offset = (page - 1) * limit;
 
         // Fetch paginated data
-        const ticketsSnapshot = await fastify.db
-            .collection('tickets')
+        const ticketsSnapshot = await query
             .offset(offset)
             .limit(limit)
             .get();

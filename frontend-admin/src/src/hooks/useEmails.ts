@@ -7,6 +7,8 @@ import { getUsers } from '../../api/users/get-users';
 import { getAdminsFromAPI } from '../../api/shared/get-admins';
 import { useAuth } from './useAuth';
 
+const PAGE_SIZE = 10;
+
 export interface EmailRecipient {
   email: string;
   name: string;
@@ -19,6 +21,9 @@ export function useEmails() {
   const [logs, setLogs] = useState<EmailLog[]>([]);
   const [recipients, setRecipients] = useState<EmailRecipient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [logsPage, setLogsPage] = useState(1);
+  const [logsTotalPages, setLogsTotalPages] = useState(1);
+  const [logsTotalItems, setLogsTotalItems] = useState(0);
 
   const fetchTemplates = async () => {
     try {
@@ -29,20 +34,53 @@ export function useEmails() {
     }
   };
 
-  const fetchLogs = async () => {
+  const fetchLogs = async (page: number) => {
     try {
-      const data = await getEmailLogsApi();
-      setLogs(data);
+      const result = await getEmailLogsApi(page, PAGE_SIZE);
+      setLogs(result.data);
+      setLogsPage(result.pagination.currentPage || page);
+      setLogsTotalPages(result.pagination.totalPages || 1);
+      setLogsTotalItems(result.pagination.totalItems || 0);
     } catch (error) {
       console.error('Error fetching logs:', error);
     }
   };
 
+  const fetchAllUsers = async () => {
+    const users: any[] = [];
+    let page = 1;
+    let totalPages = 1;
+
+    do {
+      const result = await getUsers(page, 100);
+      users.push(...result.data);
+      totalPages = result.pagination.totalPages || 1;
+      page += 1;
+    } while (page <= totalPages);
+
+    return users;
+  };
+
+  const fetchAllAdmins = async () => {
+    const admins: any[] = [];
+    let page = 1;
+    let totalPages = 1;
+
+    do {
+      const result = await getAdminsFromAPI(page, 100);
+      admins.push(...result.data);
+      totalPages = result.pagination.totalPages || 1;
+      page += 1;
+    } while (page <= totalPages);
+
+    return admins;
+  };
+
   const fetchRecipients = async () => {
     try {
       const [usersData, adminsData] = await Promise.all([
-        getUsers().catch(() => []),
-        getAdminsFromAPI().catch(() => []),
+        fetchAllUsers().catch(() => []),
+        fetchAllAdmins().catch(() => []),
       ]);
 
       const userRecipients: EmailRecipient[] = (usersData || []).map((u: User) => ({
@@ -66,19 +104,19 @@ export function useEmails() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      await Promise.all([fetchTemplates(), fetchLogs(), fetchRecipients()]);
+      await Promise.all([fetchTemplates(), fetchLogs(logsPage), fetchRecipients()]);
       setLoading(false);
     };
     fetchData();
 
     // Poll for new logs every 30 seconds
     const pollInterval = setInterval(() => {
-      fetchLogs();
+      fetchLogs(logsPage);
     }, 30000);
 
     // Cleanup interval on unmount
     return () => clearInterval(pollInterval);
-  }, []);
+  }, [logsPage]);
 
   const sendEmail = async (recipient: string, templateId: string, variables?: Record<string, string>) => {
     if (!user?.adminId) {
@@ -93,7 +131,7 @@ export function useEmails() {
     });
 
     // Refresh logs after sending
-    await fetchLogs();
+    await fetchLogs(logsPage);
   };
 
   return {
@@ -101,6 +139,10 @@ export function useEmails() {
     logs,
     recipients,
     loading,
+    logsPage,
+    logsTotalPages,
+    logsTotalItems,
+    setLogsPage,
     sendEmail,
   };
 }

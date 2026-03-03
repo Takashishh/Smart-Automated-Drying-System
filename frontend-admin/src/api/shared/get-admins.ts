@@ -1,4 +1,5 @@
 import { auth } from "../../firebase/firebase-config";
+import type { PaginatedResult } from "../users/get-users";
 
 export interface AdminData {
   uid?: string; // Firebase UID
@@ -14,7 +15,7 @@ export interface AdminData {
   lastLogin?: string | null;
 }
 
-export async function getAdminsFromAPI(): Promise<AdminData[]> {
+export async function getAdminsFromAPI(page: number = 1, limit: number = 10): Promise<PaginatedResult<AdminData>> {
   const currentUser = auth.currentUser;
 
   if (!currentUser) {
@@ -23,7 +24,11 @@ export async function getAdminsFromAPI(): Promise<AdminData[]> {
 
   const idToken = await currentUser.getIdToken();
 
-  const res = await fetch("http://localhost:3000/admin/get-admins", {
+  const url = new URL("http://localhost:3000/admin/get-admins");
+  url.searchParams.set("page", String(page));
+  url.searchParams.set("limit", String(limit));
+
+  const res = await fetch(url.toString(), {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -38,5 +43,13 @@ export async function getAdminsFromAPI(): Promise<AdminData[]> {
     throw new Error('Failed to load admins');
   }
 
-  return json?.data ?? [];
+  return {
+    data: Array.isArray(json?.data) ? json.data : [],
+    pagination: json?.pagination ?? {
+      currentPage: page,
+      pageSize: limit,
+      totalItems: 0,
+      totalPages: 0,
+    },
+  };
 }

@@ -3,53 +3,61 @@ import { createAdminAccount, type CreateAdminPayload } from '../../api/shared/cr
 import { getAdminsFromAPI } from '../../api/shared/get-admins';
 import { Admin } from '../lib/types';
 
+const PAGE_SIZE = 10;
+
 export function useAdmins() {
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+
+  const fetchAdmins = async (page: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await getAdminsFromAPI(page, PAGE_SIZE);
+      const data = result.data;
+      
+      const mappedAdmins: Admin[] = data.map(admin => ({
+        adminId: admin.adminId,
+        uid: admin.uid,
+        email: admin.email,
+        firstName: admin.firstName ?? undefined,
+        lastName: admin.lastName ?? undefined,
+        middleName: admin.middleName ?? undefined,
+        role: admin.role as 'admin' | 'super-admin',
+        status: admin.status as 'active' | 'disabled',
+        authMethod: 'email' as const,
+        createdDate: admin.createdDate ?? new Date().toISOString(),
+        lastLogin: admin.lastLogin ?? new Date().toISOString()
+      }));
+      
+      setAdmins(mappedAdmins);
+      setCurrentPage(result.pagination.currentPage || page);
+      setTotalPages(result.pagination.totalPages || 1);
+      setTotalItems(result.pagination.totalItems || 0);
+    } catch (err) {
+      console.error('Error fetching admins:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch admins');
+      setAdmins([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchAdmins = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getAdminsFromAPI();
-        
-        // Map the API response to the Admin interface
-        const mappedAdmins: Admin[] = data.map(admin => ({
-          adminId: admin.adminId,
-          uid: admin.uid, // Include Firebase UID
-          email: admin.email,
-          firstName: admin.firstName ?? undefined,
-          lastName: admin.lastName ?? undefined,
-          middleName: admin.middleName ?? undefined,
-          role: admin.role as 'admin' | 'super-admin',
-          status: admin.status as 'active' | 'disabled',
-          authMethod: 'email' as const, // Default to email if not provided
-          createdDate: admin.createdDate ?? new Date().toISOString(),
-          lastLogin: admin.lastLogin ?? new Date().toISOString()
-        }));
-        
-        setAdmins(mappedAdmins);
-      } catch (err) {
-        console.error('Error fetching admins:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch admins');
-        setAdmins([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchAdmins();
+    fetchAdmins(currentPage);
 
     // Poll for new admins every 30 seconds
     const pollInterval = setInterval(() => {
-      fetchAdmins();
+      fetchAdmins(currentPage);
     }, 30000);
 
     // Cleanup interval on unmount
     return () => clearInterval(pollInterval);
-  }, []);
+  }, [currentPage]);
   const createAdmin = async (data: CreateAdminPayload) => {
     const apiResult = await createAdminAccount(data);
 
@@ -102,6 +110,10 @@ export function useAdmins() {
     admins,
     loading,
     error,
+    currentPage,
+    totalPages,
+    totalItems,
+    setCurrentPage,
     createAdmin,
     toggleAdminStatus
   };

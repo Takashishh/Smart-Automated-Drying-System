@@ -28,12 +28,17 @@ interface AuditLogDetail extends AuditLog {
 export function AuditLogsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc'); // 'desc' = newest first
   const [selectedLog, setSelectedLog] = useState<AuditLogDetail | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
+
+  const PAGE_SIZE = 10;
 
   // Fetch audit logs on mount and poll every 30 seconds
   useEffect(() => {
@@ -46,13 +51,16 @@ export function AuditLogsPage() {
 
     // Cleanup interval on unmount
     return () => clearInterval(pollInterval);
-  }, []);
+  }, [currentPage]);
 
   const fetchAuditLogs = async () => {
     try {
       setLoading(true);
-      const data = await getAuditLogs();
-      setLogs(data);
+      const result = await getAuditLogs(currentPage, PAGE_SIZE);
+      setLogs(result.data);
+      setCurrentPage(result.pagination.currentPage || currentPage);
+      setTotalPages(result.pagination.totalPages || 1);
+      setTotalItems(result.pagination.totalItems || 0);
     } catch (error) {
       console.error('Failed to fetch audit logs:', error);
       toast.error('Couldn\'t load system records. Please refresh the page.');
@@ -294,6 +302,28 @@ export function AuditLogsPage() {
           </table>
         </div>
       </Card>
+
+      <div className="mt-4 flex items-center justify-between">
+        <p className="text-sm text-gray-600">
+          Page {currentPage} of {Math.max(totalPages, 1)} · {totalItems} total logs
+        </p>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage <= 1 || loading}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages || 1))}
+            disabled={loading || currentPage >= (totalPages || 1)}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
 
       <div className="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
         <h3 className="text-sm font-semibold text-gray-700 mb-2">
