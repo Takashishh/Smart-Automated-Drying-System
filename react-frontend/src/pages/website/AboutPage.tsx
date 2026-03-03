@@ -53,7 +53,7 @@ export function AboutPage() {
               </p>
               <p className="text-gray-600 mb-4 leading-relaxed">
                 Our Smart Automated Laundry Drying System solves this universal
-                problem by combining weather monitoring, predictive AI, and
+                problem by combining weather monitoring, and
                 automated controls to provide complete peace of mind.
               </p>
               <p className="text-gray-600 leading-relaxed">
@@ -141,11 +141,7 @@ export function AboutPage() {
               icon: CloudRain,
               title: 'Rain Sensor',
               desc: 'Detects rainfall instantly to trigger automatic protection'
-            }, {
-              icon: Scale,
-              title: 'Load Cell',
-              desc: 'Measures clothes weight to prevent overloading and track drying progress'
-            }].map((sensor, index) => <motion.div key={sensor.title} initial={{
+            }, ].map((sensor, index) => <motion.div key={sensor.title} initial={{
               opacity: 0,
               y: 20
             }} whileInView={{

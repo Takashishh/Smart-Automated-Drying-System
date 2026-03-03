@@ -13,7 +13,7 @@ export function Footer({
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-lg overflow-hidden shadow-md">
-                <img src="/Iconi.png" alt="Smart Laundry Logo" className="w-full h-full object-cover" />
+                <img src="/iconi.png" alt="Smart Laundry Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-lg font-bold text-gray-900">
                 Smart Laundry
@@ -40,7 +40,7 @@ export function Footer({
           <div>
             <h3 className="font-semibold text-gray-900 mb-4">Quick Links</h3>
             <ul className="space-y-3">
-              {['Home', 'About', 'Features', 'Manuals', 'Login'].map(item => <li key={item}>
+              {['Home', 'Features', 'Manuals', 'Login'].map(item => <li key={item}>
                   <button onClick={() => onNavigate(item.toLowerCase())} className="text-gray-500 hover:text-blue-600 text-sm transition-colors">
                     {item}
                   </button>

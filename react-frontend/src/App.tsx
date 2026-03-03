@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Header } from './components/website/Header';
 import { Footer } from './components/website/Footer';
 import { HomePage } from './pages/website/HomePage';
-import { AboutPage } from './pages/website/AboutPage';
 import { FeaturesPage } from './pages/website/FeaturesPage';
 import { ManualsPage } from './pages/website/ManualsPage';
 import { ContactPage } from './pages/website/ContactPage';
@@ -62,7 +61,6 @@ export function App() {
       case 'home':
         return <HomePage onNavigate={setCurrentPage} />;
       case 'about':
-        return <AboutPage />;
       case 'features':
         return <FeaturesPage />;
       case 'manuals':

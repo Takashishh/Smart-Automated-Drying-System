@@ -31,9 +31,6 @@ export function Header({
     id: 'home',
     label: 'Home'
   }, {
-    id: 'about',
-    label: 'About'
-  }, {
     id: 'contact',
     label: 'Contact'
   }, {
@@ -53,7 +50,7 @@ export function Header({
   // Filter nav items based on authentication status
   const navItems = isAuthenticated 
     ? allNavItems 
-    : allNavItems.filter(item => ['home', 'about', 'contact', 'features', 'manuals'].includes(item.id));
+    : allNavItems.filter(item => ['home', 'contact', 'features', 'manuals'].includes(item.id));
 
   const handleNavClick = (id: string) => {
     if (id === 'logout') {

@@ -1,8 +1,12 @@
 import React from 'react';
 import { FeatureCard } from '../../components/website/FeatureCard';
-import { Droplets, Thermometer, CloudRain, Scale, MoveVertical, Wind, Smartphone, Bell, ToggleLeft } from 'lucide-react';
+import { AboutPage } from './AboutPage';
+import { Droplets, Thermometer, CloudRain, MoveVertical, Wind, Smartphone, Bell, ToggleLeft } from 'lucide-react';
 export function FeaturesPage() {
-  return <div className="pt-24 pb-20">
+  return <div>
+      <AboutPage />
+
+      <section className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-20">
           <h1 className="text-4xl font-bold text-gray-900 mb-6">
@@ -25,7 +29,6 @@ export function FeaturesPage() {
             <FeatureCard icon={<Droplets size={24} />} title="Humidity Sensing" description="Continuously monitors air moisture levels to determine drying progress." />
             <FeatureCard icon={<Thermometer size={24} />} title="Temp Monitoring" description="Tracks ambient temperature to adjust heating assistance accordingly." />
             <FeatureCard icon={<CloudRain size={24} />} title="Rain Detection" description="High-sensitivity sensor detects the first drops of rain instantly." />
-            <FeatureCard icon={<Scale size={24} />} title="Weight Detection" description="Load cell measures clothes weight to prevent overloading." />
           </div>
         </div>
 
@@ -59,5 +62,6 @@ export function FeaturesPage() {
           </div>
         </div>
       </div>
+      </section>
     </div>;
 }
